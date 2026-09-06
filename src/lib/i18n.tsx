@@ -1,7 +1,56 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 export type Lang = "ar" | "en";
+
+/** Default for fresh visits. Not derived from Accept-Language. */
+export const DEFAULT_LANG: Lang = "en";
 export const LANG_KEY = "waahid-lang";
+const LANG_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
+
+export function resolveLang(value: string | null | undefined): Lang {
+  if (value === "en" || value === "ar") return value;
+  return DEFAULT_LANG;
+}
+
+function readLangCookie(): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(new RegExp(`(?:^|; )${LANG_KEY}=([^;]*)`));
+  return match?.[1] ?? null;
+}
+
+/** Client-only: localStorage, then lang cookie, then DEFAULT_LANG. */
+export function readSavedLang(): Lang {
+  if (typeof window === "undefined") return DEFAULT_LANG;
+  try {
+    const saved = localStorage.getItem(LANG_KEY);
+    if (saved === "en" || saved === "ar") return saved;
+  } catch {
+    /* ignore */
+  }
+  return resolveLang(readLangCookie());
+}
+
+export function persistLang(lang: Lang): void {
+  if (typeof document !== "undefined") {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+    try {
+      document.cookie = `${LANG_KEY}=${lang};path=/;max-age=${LANG_COOKIE_MAX_AGE};samesite=lax`;
+    } catch {
+      /* ignore */
+    }
+  }
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem(LANG_KEY, lang);
+    } catch {
+      /* ignore */
+    }
+  }
+}
+
+/** Runs in <head> before paint so html lang/dir match the saved preference (default en). */
+export const LANG_BOOTSTRAP_SCRIPT = `(function(){var k="${LANG_KEY}",l="${DEFAULT_LANG}";try{var s=localStorage.getItem(k);if(s==="en"||s==="ar")l=s;else{var m=document.cookie.match(new RegExp("(?:^|; )"+k+"=([^;]*)"));if(m&&(m[1]==="en"||m[1]==="ar"))l=m[1];}}catch(e){}document.documentElement.lang=l;document.documentElement.dir=l==="ar"?"rtl":"ltr";})();`;
 
 const strings = {
   ar: {
@@ -344,29 +393,11 @@ type I18nValue = {
 
 const I18nContext = createContext<I18nValue | null>(null);
 
-function readSavedLang(): Lang {
-  if (typeof window === "undefined") return "en";
-  try {
-    const saved = localStorage.getItem(LANG_KEY);
-    if (saved === "en" || saved === "ar") return saved;
-  } catch {
-    /* ignore */
-  }
-  return "en";
-}
-
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(readSavedLang);
+  const [lang, setLangState] = useState<Lang>(() => readSavedLang());
 
   useEffect(() => {
-    const dir = lang === "ar" ? "rtl" : "ltr";
-    document.documentElement.lang = lang;
-    document.documentElement.dir = dir;
-    try {
-      localStorage.setItem(LANG_KEY, lang);
-    } catch {
-      /* ignore */
-    }
+    persistLang(lang);
   }, [lang]);
 
   const value = useMemo<I18nValue>(

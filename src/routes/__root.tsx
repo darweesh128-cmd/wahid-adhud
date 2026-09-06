@@ -3,7 +3,7 @@ import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-r
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/lib/auth/provider";
-import { I18nProvider, useI18n } from "@/lib/i18n";
+import { I18nProvider, LANG_BOOTSTRAP_SCRIPT, useI18n } from "@/lib/i18n";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import appCss from "../styles.css?url";
 
@@ -59,6 +59,7 @@ function RootDocument() {
   return (
     <html lang="en" dir="ltr" className="antialiased" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: LANG_BOOTSTRAP_SCRIPT }} />
         <HeadContent />
       </head>
       <body className="bg-bg text-fg">
