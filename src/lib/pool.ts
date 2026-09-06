@@ -1,5 +1,5 @@
 export const TARGET_USDT = 1_000_000;
-export const UNIT_USDT = 1;
+export const UNIT_USDT = 5;
 export const HOUSE_WALLET = "TVmEo3Mn6dJfAWgk8KUF7rEvcdbdegmDER";
 
 export const DEFAULT_POOL_ADDRESSES = {
