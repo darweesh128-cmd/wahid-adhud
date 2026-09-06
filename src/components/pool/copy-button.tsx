@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { Button, type ButtonProps } from "@/components/ui/button";
+import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 export function CopyButton({
@@ -8,7 +9,7 @@ export function CopyButton({
   className,
   size = "icon",
   variant = "secondary",
-  label = "Copy",
+  label,
 }: {
   value: string;
   className?: string;
@@ -16,7 +17,9 @@ export function CopyButton({
   variant?: ButtonProps["variant"];
   label?: string;
 }) {
+  const { t } = useI18n();
   const [copied, setCopied] = useState(false);
+  const copyLabel = label ?? t("copy");
 
   async function onCopy() {
     try {
@@ -40,10 +43,10 @@ export function CopyButton({
       size={size}
       onClick={onCopy}
       className={cn(className)}
-      aria-label={copied ? "Copied" : label}
+      aria-label={copied ? t("copied") : copyLabel}
     >
       {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-      {size !== "icon" ? <span>{copied ? "Copied" : label}</span> : null}
+      {size !== "icon" ? <span>{copied ? t("copied") : copyLabel}</span> : null}
     </Button>
   );
 }

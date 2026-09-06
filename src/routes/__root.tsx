@@ -3,10 +3,11 @@ import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-r
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/lib/auth/provider";
+import { I18nProvider, useI18n } from "@/lib/i18n";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import appCss from "../styles.css?url";
 
-const APP_NAME = "Wahid · The Adhud";
+const APP_NAME = "واحد · عائلة العضد";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -16,7 +17,8 @@ export const Route = createRootRoute({
       { title: APP_NAME },
       {
         name: "description",
-        content: "Wahid — The Adhud. You may be fine today. Someone else is not. Pay $1 USDT. Become an Adhud.",
+        content:
+          "واحد — عائلة العضد. قد تكون بخير اليوم. غيرك ليس كذلك. ادفع 1 USDT. تصبح عضيداً. Wahid · The Adhud.",
       },
       { name: "theme-color", content: "#090B0A" },
     ],
@@ -29,7 +31,7 @@ export const Route = createRootRoute({
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap",
       },
     ],
   }),
@@ -50,28 +52,36 @@ function RootDocument() {
   );
 
   return (
-    <html lang="en" dir="ltr" className="antialiased" suppressHydrationWarning>
+    <html lang="ar" dir="rtl" className="antialiased" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
       <body className="bg-bg text-fg">
         <PreviewHostBridge />
         <AuthProvider>
-          <QueryClientProvider client={queryClient}>
-            <Outlet />
-            <Toaster
-              theme="dark"
-              position="top-center"
-              dir="ltr"
-              toastOptions={{
-                className:
-                  "!bg-surface !text-fg !border-border !font-[family-name:var(--font-sans)]",
-              }}
-            />
-          </QueryClientProvider>
+          <I18nProvider>
+            <QueryClientProvider client={queryClient}>
+              <Outlet />
+              <AppToaster />
+            </QueryClientProvider>
+          </I18nProvider>
         </AuthProvider>
         <Scripts />
       </body>
     </html>
+  );
+}
+
+function AppToaster() {
+  const { dir } = useI18n();
+  return (
+    <Toaster
+      theme="dark"
+      position="top-center"
+      dir={dir}
+      toastOptions={{
+        className: "!bg-surface !text-fg !border-border !font-[family-name:var(--font-sans)]",
+      }}
+    />
   );
 }

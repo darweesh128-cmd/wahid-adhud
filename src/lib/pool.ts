@@ -158,21 +158,24 @@ export function isCountry(value: string): value is Country {
   return (COUNTRIES as readonly string[]).includes(value);
 }
 
-export function walletHint(wallet: string, expect?: Network): string | null {
+export function walletHintKey(wallet: string, expect?: Network): "btc" | "trc20" | "erc20" | "invalid" | null {
   const value = wallet.trim();
   if (!value) return null;
-  if (BTC_RE.test(value)) {
+  if (BTC_RE.test(value)) return "btc";
+  if (expect === "trc20" && !TRC20_RE.test(value)) return "trc20";
+  if (expect === "erc20" && !ERC20_RE.test(value)) return "erc20";
+  if (!isValidWallet(value, expect)) return "invalid";
+  return null;
+}
+
+export function walletHint(wallet: string, expect?: Network): string | null {
+  const key = walletHintKey(wallet, expect);
+  if (key === "btc") {
     return "That is a Bitcoin address, not USDT. Open USDT on Tron (TRC-20) and copy an address starting with T.";
   }
-  if (expect === "trc20" && !TRC20_RE.test(value)) {
-    return "Invalid TRC-20 address. It must start with T.";
-  }
-  if (expect === "erc20" && !ERC20_RE.test(value)) {
-    return "Invalid ERC-20 address. It must start with 0x.";
-  }
-  if (!isValidWallet(value, expect)) {
-    return "Invalid address. TRC-20 starts with T. ERC-20 starts with 0x.";
-  }
+  if (key === "trc20") return "Invalid TRC-20 address. It must start with T.";
+  if (key === "erc20") return "Invalid ERC-20 address. It must start with 0x.";
+  if (key === "invalid") return "Invalid address. TRC-20 starts with T. ERC-20 starts with 0x.";
   return null;
 }
 
@@ -182,20 +185,20 @@ export function maskWallet(wallet: string): string {
   return `${value.slice(0, 5)}…${value.slice(-4)}`;
 }
 
-export function formatUsd(n: number): string {
-  return new Intl.NumberFormat("en-US").format(n);
+export function formatUsd(n: number, lang: "ar" | "en" = "en"): string {
+  return new Intl.NumberFormat(lang === "ar" ? "ar-SA" : "en-US", { numberingSystem: "latn" }).format(n);
 }
 
-export function formatTimeAgo(iso: string, now = Date.now()): string {
+export function formatTimeAgo(iso: string, now = Date.now(), lang: "ar" | "en" = "en"): string {
   const then = new Date(iso).getTime();
   if (Number.isNaN(then)) return "";
   const delta = Math.max(0, Math.floor((now - then) / 1000));
-  if (delta < 45) return "now";
-  if (delta < 3600) return `${Math.floor(delta / 60)}m ago`;
-  if (delta < 86400) return `${Math.floor(delta / 3600)}h ago`;
+  if (delta < 45) return lang === "ar" ? "الآن" : "now";
+  if (delta < 3600) return lang === "ar" ? `${Math.floor(delta / 60)}د` : `${Math.floor(delta / 60)}m ago`;
+  if (delta < 86400) return lang === "ar" ? `${Math.floor(delta / 3600)}س` : `${Math.floor(delta / 3600)}h ago`;
   const days = Math.floor(delta / 86400);
-  if (days < 30) return `${days}d ago`;
-  return new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(new Date(iso));
+  if (days < 30) return lang === "ar" ? `${days}ي` : `${days}d ago`;
+  return new Intl.DateTimeFormat(lang === "ar" ? "ar" : "en", { dateStyle: "medium" }).format(new Date(iso));
 }
 
 export function countryFromWallet(wallet: string, stored?: string | null): string {

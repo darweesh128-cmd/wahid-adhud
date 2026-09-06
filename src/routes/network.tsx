@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/pool/app-shell";
 import { NetworkMap } from "@/components/pool/network-map";
 import { getNetwork, getPool } from "@/lib/pool-api";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/network")({
   loader: async () => {
@@ -13,21 +14,19 @@ export const Route = createFileRoute("/network")({
 
 function NetworkPage() {
   const { pool, network } = Route.useLoaderData();
+  const { t } = useI18n();
   return (
     <AppShell initial={pool}>
       <main className="relative mx-auto w-full max-w-5xl px-5 pb-16">
-        <p className="text-xs font-medium text-accent">The example</p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight">The total, and the dollars moving</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-fg-muted">
-          Center is the House sum. Each $1 pulse leaves an Adhud and lands in the total. Clusters are
-          the countries they can serve from.
-        </p>
+        <p className="text-xs font-medium text-accent">{t("family")}</p>
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight">{t("networkTitle")}</h1>
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-fg-muted">{t("networkLead")}</p>
         <div className="mt-8">
           <NetworkMap data={network} />
         </div>
         <p className="mt-6 text-sm">
           <Link to="/" className="text-accent hover:underline">
-            Back to the House
+            {t("backHouse")}
           </Link>
         </p>
       </main>

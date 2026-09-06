@@ -3,6 +3,7 @@ import { AppShell } from "@/components/pool/app-shell";
 import { MemberDesk } from "@/components/pool/member-desk";
 import { getPool } from "@/lib/pool-api";
 import { isValidWallet } from "@/lib/pool";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/adhud/$wallet")({
   loader: async ({ params }) => {
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/adhud/$wallet")({
 
 function DeskPage() {
   const { pool, wallet } = Route.useLoaderData();
+  const { t } = useI18n();
   const valid = isValidWallet(wallet);
   return (
     <AppShell initial={pool}>
@@ -22,10 +24,10 @@ function DeskPage() {
           <MemberDesk wallet={wallet} />
         ) : (
           <div className="rounded-xl border border-border bg-surface p-6">
-            <h1 className="text-xl font-medium">Unknown wallet</h1>
-            <p className="mt-2 text-sm text-fg-muted">Enter a TRC-20 or ERC-20 address to open a desk.</p>
+            <h1 className="text-xl font-medium">{t("unknownWallet")}</h1>
+            <p className="mt-2 text-sm text-fg-muted">{t("unknownBody")}</p>
             <Link to="/" hash="join" className="mt-4 inline-flex text-sm text-accent hover:underline">
-              Join from the House
+              {t("joinFromHouse")}
             </Link>
           </div>
         )}

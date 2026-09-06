@@ -5,7 +5,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { claimOwner, updatePoolWallet } from "@/lib/pool-api";
-import { OWNER_STORAGE_KEY, walletHint, type PoolSnapshot } from "@/lib/pool";
+import { OWNER_STORAGE_KEY, walletHintKey, type PoolSnapshot } from "@/lib/pool";
+import { HINT_KEYS, useI18n } from "@/lib/i18n";
 
 export function OwnerPanel({
   pool,
@@ -16,6 +17,7 @@ export function OwnerPanel({
   revealed: boolean;
   onRevealed: () => void;
 }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -51,18 +53,20 @@ export function OwnerPanel({
       onRevealed();
       queryClient.setQueryData(["pool"], result.snapshot);
       void queryClient.invalidateQueries({ queryKey: ["pool"] });
-      toast.success(setup ? "Admin is live. Wallet saved." : "House wallet updated.");
+      toast.success(setup ? t("adminLive") : t("walletUpdated"));
       setOpen(false);
     },
     onError: () => {
-      toast.error("Could not save. Try again.");
+      toast.error(t("saveFail"));
     },
   });
 
-  const trcError = trc20.trim() ? walletHint(trc20, "trc20") : null;
-  const ercError = erc20.trim() ? walletHint(erc20, "erc20") : null;
-  const passError = setup && password.length > 0 && password.length < 8 ? "At least 8 characters" : null;
-  const confirmError = setup && confirm.length > 0 && confirm !== password ? "Passwords do not match" : null;
+  const trcKey = trc20.trim() ? walletHintKey(trc20, "trc20") : null;
+  const ercKey = erc20.trim() ? walletHintKey(erc20, "erc20") : null;
+  const trcError = trcKey ? t(HINT_KEYS[trcKey]) : null;
+  const ercError = ercKey ? t(HINT_KEYS[ercKey]) : null;
+  const passError = setup && password.length > 0 && password.length < 8 ? t("passShort") : null;
+  const confirmError = setup && confirm.length > 0 && confirm !== password ? t("passMismatch") : null;
   const blocked =
     mutation.isPending ||
     !password ||
@@ -80,7 +84,7 @@ export function OwnerPanel({
         size="icon"
         className="size-9 text-fg-muted"
         onClick={() => setOpen(true)}
-        aria-label="House admin"
+        aria-label={t("houseAdmin")}
       >
         <Settings2 className="size-4" />
       </Button>
@@ -94,22 +98,18 @@ export function OwnerPanel({
           >
             <button
               type="button"
-              className="absolute right-4 top-4 grid size-9 place-items-center rounded-md text-fg-muted hover:bg-surface-2 hover:text-fg"
+              className="absolute end-4 top-4 grid size-9 place-items-center rounded-md text-fg-muted hover:bg-surface-2 hover:text-fg"
               onClick={() => setOpen(false)}
-              aria-label="Close"
+              aria-label={t("close")}
             >
               <X className="size-4" />
             </button>
 
-            <p className="text-xs tracking-wide text-accent">House only</p>
+            <p className="text-xs tracking-wide text-accent">{t("houseOnly")}</p>
             <h2 id="owner-title" className="mt-2 text-xl font-medium">
-              {setup ? "Activate admin" : "Edit House wallet"}
+              {setup ? t("activateAdmin") : t("editWallet")}
             </h2>
-            <p className="mt-2 text-sm leading-relaxed text-fg-muted">
-              {setup
-                ? "Set a password and paste the receiving wallet. The gear stays on this device after save."
-                : "Enter the admin password to change the receiving address. The QR updates at once."}
-            </p>
+            <p className="mt-2 text-sm leading-relaxed text-fg-muted">{setup ? t("setupHelp") : t("editHelp")}</p>
 
             <form
               className="mt-5 space-y-3"
@@ -121,7 +121,7 @@ export function OwnerPanel({
             >
               <Field
                 id="owner-pass"
-                label="Admin password"
+                label={t("adminPass")}
                 type="password"
                 autoComplete={setup ? "new-password" : "current-password"}
                 value={password}
@@ -131,7 +131,7 @@ export function OwnerPanel({
               {setup ? (
                 <Field
                   id="owner-confirm"
-                  label="Confirm password"
+                  label={t("confirmPass")}
                   type="password"
                   autoComplete="new-password"
                   value={confirm}
@@ -141,22 +141,24 @@ export function OwnerPanel({
               ) : null}
               <Field
                 id="owner-trc"
-                label="House wallet · TRC-20"
+                label={t("houseTrc")}
                 value={trc20}
                 onChange={setTrc20}
                 error={trcError}
                 placeholder="T................................"
+                ltr
               />
               <Field
                 id="owner-erc"
-                label="House wallet · ERC-20 (optional)"
+                label={t("houseErc")}
                 value={erc20}
                 onChange={setErc20}
                 error={ercError}
                 placeholder="0x................................"
+                ltr
               />
               <Button type="submit" className="w-full" size="lg" disabled={blocked}>
-                {mutation.isPending ? "Saving…" : setup ? "Save and activate" : "Save wallet"}
+                {mutation.isPending ? t("saving") : setup ? t("saveActivate") : t("saveWallet")}
               </Button>
             </form>
           </div>
@@ -175,6 +177,7 @@ function Field({
   type = "text",
   autoComplete,
   placeholder,
+  ltr,
 }: {
   id: string;
   label: string;
@@ -184,6 +187,7 @@ function Field({
   type?: string;
   autoComplete?: string;
   placeholder?: string;
+  ltr?: boolean;
 }) {
   return (
     <div className="space-y-1.5">
@@ -198,6 +202,7 @@ function Field({
         spellCheck={false}
         value={value}
         placeholder={placeholder}
+        dir={ltr ? "ltr" : undefined}
         onChange={(event) => onChange(event.target.value)}
         className={type === "password" ? "font-sans" : undefined}
       />

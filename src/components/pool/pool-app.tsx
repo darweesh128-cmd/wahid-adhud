@@ -24,14 +24,16 @@ import {
   formatTimeAgo,
   formatUsd,
   isCountry,
-  walletHint,
+  walletHintKey,
   type Network,
   type NetworkSnapshot,
   type PoolSnapshot,
 } from "@/lib/pool";
+import { HINT_KEYS, countryLabel, useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSnapshot; network: NetworkSnapshot }) {
+  const { t, lang } = useI18n();
   const queryClient = useQueryClient();
   const [wallet, setWallet] = useState("");
   const [network, setNetwork] = useState<Network>("trc20");
@@ -97,26 +99,27 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
       void queryClient.invalidateQueries({ queryKey: ["network"] });
       if (result.settled) {
         setWinner(result.winnerWallet);
-        toast.success("The million landed. Aid reached an Adhud.");
+        toast.success(t("toastMillion"));
       } else {
-        toast.success("You are an Adhud. Send this to three people.");
+        toast.success(t("toastJoined"));
         setJustJoined(true);
         setShareOpen(true);
       }
     },
-    onError: () => toast.error("Could not join. Try again."),
+    onError: () => toast.error(t("toastJoinFail")),
   });
 
   const address = (pool.addresses ?? DEFAULT_POOL_ADDRESSES)[network];
   const contract = USDT_CONTRACTS[network];
   const detected = trimmed ? detectNetwork(trimmed) : null;
+  const hint = trimmed.length > 0 ? walletHintKey(trimmed) : null;
   const walletError =
     trimmed.length > 0
-      ? walletHint(trimmed) ??
+      ? (hint ? t(HINT_KEYS[hint]) : null) ??
         (detected && detected !== network
           ? detected === "trc20"
-            ? "That is a Tron address — choose TRC-20."
-            : "That is an Ethereum address — choose ERC-20."
+            ? t("mismatchTrc")
+            : t("mismatchErc")
           : null)
       : null;
 
@@ -134,44 +137,32 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
     <AppShell initial={pool}>
       <main className="relative mx-auto w-full max-w-5xl px-5 pb-28 pt-2 md:pb-16">
         <section className="stagger-in max-w-2xl">
-          <p className="text-xs font-medium text-accent">Wallet-level · no account · USDT</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-fg sm:text-4xl">
-            You may be fine today.
-            <span className="mt-2 block text-fg-muted">Someone else is not.</span>
+          <p className="text-xs font-medium text-accent">{t("storyKicker")}</p>
+          <h1 className="mt-4 text-3xl font-semibold tracking-tight text-fg sm:text-5xl">
+            {t("storyH1a")}
+            <span className="mt-2 block text-fg-muted">{t("storyH1b")}</span>
           </h1>
-          <p className="mt-5 max-w-xl text-sm leading-relaxed text-fg-muted sm:text-base">
-            One dollar. Become an Adhud. Do not join to take — join because you are someone's arm.
-          </p>
+          <p className="mt-6 max-w-xl text-base leading-relaxed text-fg sm:text-lg">{t("storyP1")}</p>
+          <p className="mt-4 max-w-xl text-sm leading-relaxed text-fg-muted sm:text-base">{t("storyP2")}</p>
           <div className="mt-8 flex flex-wrap gap-2">
             <Button size="lg" onClick={scrollToJoin}>
-              Become an Adhud · 1 USDT
+              {t("joinCta")}
             </Button>
             <Button size="lg" variant="secondary" onClick={() => setShareOpen(true)}>
-              Send to three
+              {t("sendThree")}
             </Button>
             <Button size="lg" variant="outline" asChild>
-              <Link to="/network">Open the network</Link>
+              <Link to="/network">{t("openNetwork")}</Link>
             </Button>
           </div>
         </section>
 
-        <section className="mt-10">
-          <p className="text-xs font-medium text-accent">The example</p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">The total, and the dollars moving.</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-fg-muted">
-            Center is the House sum. Each pulse is $1 USDT leaving an Adhud. Clusters are countries they can serve from.
-          </p>
-          <div className="mt-6">
-            <NetworkMap data={graph} compact />
-          </div>
-        </section>
-
-        <section className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+        <section className="mt-12 grid gap-5 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
           <article className="rounded-xl border border-border bg-surface p-5 sm:p-6">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <ScanLine className="size-4 text-accent" />
-                <h2 className="text-sm font-medium">House wallet</h2>
+                <h2 className="text-sm font-medium">{t("houseWallet")}</h2>
               </div>
               <Badge variant="outline">{network === "trc20" ? "TRC-20" : "ERC-20"}</Badge>
             </div>
@@ -186,34 +177,32 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
             <div className="mx-auto mt-4 aspect-square w-full max-w-[220px] rounded-lg bg-paper p-3">
               <WalletQr value={address} />
             </div>
-            <p className="mt-3 text-center text-xs text-fg-subtle">Scan, send 1 USDT, become an Adhud</p>
+            <p className="mt-3 text-center text-xs text-fg-subtle">{t("scanHint")}</p>
             <div className="mt-4 rounded-md border border-border bg-surface-2 p-3">
-              <p className="text-[11px] text-fg-subtle">Address</p>
+              <p className="text-[11px] text-fg-subtle">{t("address")}</p>
               <div className="mt-1.5 flex items-center gap-2">
-                <p className="min-w-0 flex-1 break-all font-mono text-[12px] leading-relaxed text-fg text-left" dir="ltr">
+                <p className="min-w-0 flex-1 break-all text-left font-mono text-[12px] leading-relaxed text-fg" dir="ltr">
                   {address}
                 </p>
                 <CopyButton value={address} />
               </div>
             </div>
-            <p className="mt-3 font-mono text-[11px] leading-relaxed text-fg-subtle text-left" dir="ltr">
+            <p className="mt-3 text-left font-mono text-[11px] leading-relaxed text-fg-subtle" dir="ltr">
               USDT {contract}
             </p>
             {network === "erc20" ? (
-              <p className="mt-2 text-xs text-fg-muted">Ethereum gas can exceed one dollar. TRC-20 is the right network for 1 USDT.</p>
+              <p className="mt-2 text-xs text-fg-muted">{t("ethGas")}</p>
             ) : (
-              <p className="mt-2 text-xs text-fg-muted">Tron fees stay low — built for a one-dollar gift.</p>
+              <p className="mt-2 text-xs text-fg-muted">{t("tronFees")}</p>
             )}
           </article>
 
           <article id="join" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
             <div className="flex items-center gap-2">
               <Wallet className="size-4 text-accent" />
-              <h2 className="text-sm font-medium">Enter your wallet. Become an Adhud.</h2>
+              <h2 className="text-sm font-medium">{t("joinTitle")}</h2>
             </div>
-            <p className="mt-3 text-sm leading-relaxed text-fg-muted">
-              No name. No login. Your wallet is the desk. Pick the country you can serve from — that is your node on the network.
-            </p>
+            <p className="mt-3 text-sm leading-relaxed text-fg-muted">{t("joinBody")}</p>
             <form
               className="mt-5 space-y-4"
               onSubmit={(event) => {
@@ -224,13 +213,14 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
             >
               <div className="space-y-2">
                 <label htmlFor="wallet" className="text-xs font-medium text-fg-muted">
-                  Payout wallet
+                  {t("payoutWallet")}
                 </label>
                 <Input
                   id="wallet"
                   name="wallet"
                   autoComplete="off"
                   spellCheck={false}
+                  dir="ltr"
                   placeholder={network === "trc20" ? "T................................" : "0x................................"}
                   value={wallet}
                   onChange={(event) => onWalletChange(event.target.value)}
@@ -240,7 +230,7 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
               </div>
               <div className="space-y-2">
                 <label htmlFor="country" className="text-xs font-medium text-fg-muted">
-                  Country you can serve
+                  {t("serveCountry")}
                 </label>
                 <select
                   id="country"
@@ -250,32 +240,40 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
                 >
                   {COUNTRIES.map((item) => (
                     <option key={item} value={item}>
-                      {item}
+                      {countryLabel(item, lang)}
                     </option>
                   ))}
                 </select>
               </div>
               <Button type="submit" size="lg" className="w-full" disabled={mutation.isPending || !trimmed || Boolean(walletError)}>
-                {mutation.isPending ? "Joining…" : "Become an Adhud · 1 USDT"}
+                {mutation.isPending ? t("joining") : t("joinCta")}
               </Button>
             </form>
 
             {pool.yourTickets > 0 ? (
               <div className="mt-4 rounded-md border border-border bg-accent-soft px-4 py-3">
-                <p className="text-xs text-fg-muted">Your gift this round</p>
+                <p className="text-xs text-fg-muted">{t("yourGift")}</p>
                 <p className="mt-1 font-mono text-lg tabular-nums text-accent">
                   {pool.yourTickets} USDT
-                  <span className="ml-2 text-xs text-fg-muted">
-                    · {pool.yourTickets} of {formatUsd(pool.target)}
+                  <span className="ms-2 text-xs text-fg-muted">
+                    · {pool.yourTickets} {t("of")} {formatUsd(pool.target, lang)}
                   </span>
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <Button type="button" variant="secondary" size="sm" onClick={() => { setJustJoined(true); setShareOpen(true); }}>
-                    Send to three
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      setJustJoined(true);
+                      setShareOpen(true);
+                    }}
+                  >
+                    {t("sendThree")}
                   </Button>
                   <Button type="button" variant="outline" size="sm" asChild>
                     <Link to="/adhud/$wallet" params={{ wallet: trimmed }}>
-                      Open my desk
+                      {t("openDesk")}
                     </Link>
                   </Button>
                 </div>
@@ -286,31 +284,39 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
             <ul className="space-y-3 text-sm text-fg-muted">
               <li className="flex gap-3">
                 <Fingerprint className="mt-0.5 size-4 shrink-0 text-accent" />
-                No account. Every payer is an Adhud. The wallet is the name.
+                {t("point1")}
               </li>
               <li className="flex gap-3">
                 <Shield className="mt-0.5 size-4 shrink-0 text-accent" />
-                Do not join to take. Join because someone needs an arm.
+                {t("point2")}
               </li>
               <li className="flex gap-3">
                 <Users className="mt-0.5 size-4 shrink-0 text-accent" />
-                Money, service, force, influence. Every million aids one of us.
+                {t("point3")}
               </li>
             </ul>
           </article>
         </section>
 
+        <section className="mt-12">
+          <p className="text-xs font-medium text-accent">{t("networkTitle")}</p>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-fg-muted">{t("networkLead")}</p>
+          <div className="mt-6">
+            <NetworkMap data={graph} compact />
+          </div>
+        </section>
+
         <section className="mt-10">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-sm font-medium">New Adhuds</h2>
+            <h2 className="text-sm font-medium">{t("newAdhuds")}</h2>
             <span className="flex items-center gap-2 text-[11px] text-fg-subtle">
               <span className="live-dot size-1.5 rounded-full bg-accent" />
-              Live
+              {t("live")}
             </span>
           </div>
           <ol className="mt-4 divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
             {pool.recent.length === 0 ? (
-              <li className="px-4 py-8 text-center text-sm text-fg-muted">No Adhud yet. Be the first.</li>
+              <li className="px-4 py-8 text-center text-sm text-fg-muted">{t("noAdhud")}</li>
             ) : (
               pool.recent.map((row) => (
                 <li key={row.id} className="flex items-center justify-between gap-3 px-4 py-3">
@@ -318,13 +324,13 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
                     <Link
                       to="/adhud/$wallet"
                       params={{ wallet: row.wallet }}
-                      className="truncate font-mono text-sm text-left hover:text-accent"
+                      className="truncate text-left font-mono text-sm hover:text-accent"
                       dir="ltr"
                     >
                       {row.walletMasked}
                     </Link>
                     <p className="mt-0.5 text-[11px] text-fg-subtle">
-                      {row.network === "trc20" ? "TRC-20" : "ERC-20"} · {formatTimeAgo(row.at, now)}
+                      {row.network === "trc20" ? "TRC-20" : "ERC-20"} · {formatTimeAgo(row.at, now, lang)}
                     </p>
                   </div>
                   <p className="shrink-0 font-mono text-sm tabular-nums text-accent">+{row.amount}</p>
@@ -335,54 +341,61 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
         </section>
 
         <section className="mt-12">
-          <h2 className="text-sm font-medium">How the House works</h2>
+          <h2 className="text-sm font-medium">{t("howTitle")}</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <Step n="01" title="Become an Adhud">
-              Scan, send 1 USDT, register your wallet and the country you can serve.
+            <Step n="01" title={t("step1t")}>
+              {t("step1")}
             </Step>
-            <Step n="02" title="The arm strengthens">
-              Target: {formatUsd(pool.target)} USDT. Every dollar is visible on the live ledger and the network.
+            <Step n="02" title={t("step2t")}>
+              {t("step2")}
             </Step>
-            <Step n="03" title="Aid reaches an Adhud">
-              At one million, aid lands with one of us. A new round begins.
+            <Step n="03" title={t("step3t")}>
+              {t("step3")}
             </Step>
           </div>
         </section>
 
         {pool.previous ? (
           <section className="mt-10 rounded-xl border border-border bg-surface p-5 sm:p-6">
-            <p className="text-xs tracking-wide text-fg-subtle">Previous round · aid arrived</p>
-            <h2 className="mt-2 text-lg font-medium">This Adhud received the million.</h2>
+            <p className="text-xs tracking-wide text-fg-subtle">{t("prevKicker")}</p>
+            <h2 className="mt-2 text-lg font-medium">{t("prevTitle")}</h2>
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <p className="min-w-0 flex-1 break-all font-mono text-sm text-left" dir="ltr">
+              <p className="min-w-0 flex-1 break-all text-left font-mono text-sm" dir="ltr">
                 {pool.previous.winnerWallet}
               </p>
-              <CopyButton value={pool.previous.winnerWallet} size="sm" variant="outline" label="Copy address" />
+              <CopyButton value={pool.previous.winnerWallet} size="sm" variant="outline" label={t("copyAddress")} />
             </div>
             <p className="mt-3 text-xs text-fg-muted">
-              {formatUsd(pool.previous.collected)} USDT · {formatUsd(pool.previous.donorCount)} Adhuds · round{" "}
-              {pool.previous.roundId}
+              {formatUsd(pool.previous.collected, lang)} USDT · {formatUsd(pool.previous.donorCount, lang)} {t("adhuds")} ·{" "}
+              {t("round")} {pool.previous.roundId}
             </p>
           </section>
         ) : null}
 
         <footer className="mt-14 border-t border-border pt-8 text-sm text-fg-muted">
-          <p className="font-medium text-fg">We are the Adhud. Every payer is one of us.</p>
-          <p className="mt-2 max-w-2xl leading-relaxed">
-            No state. No bank. No account. USDT transfers are final. Each dollar is an arm. Each million is aid.
+          <p className="font-medium text-fg">{t("footerLead")}</p>
+          <p className="mt-2 max-w-2xl leading-relaxed">{t("footerBody")}</p>
+          <p className="mt-6 text-[11px] text-fg-subtle">
+            {t("brand")} · {t("family")}
           </p>
-          <p className="mt-6 text-[11px] text-fg-subtle">Wahid · The Adhud</p>
         </footer>
       </main>
 
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-bg/95 p-3 backdrop-blur md:hidden">
         {pool.yourTickets > 0 ? (
-          <Button className="w-full" size="lg" onClick={() => { setJustJoined(true); setShareOpen(true); }}>
-            Send to three
+          <Button
+            className="w-full"
+            size="lg"
+            onClick={() => {
+              setJustJoined(true);
+              setShareOpen(true);
+            }}
+          >
+            {t("sendThree")}
           </Button>
         ) : (
           <Button className="w-full" size="lg" onClick={scrollToJoin}>
-            Become an Adhud · 1 USDT
+            {t("joinCta")}
           </Button>
         )}
       </div>
@@ -394,22 +407,22 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
           <div className="relative w-full max-w-md rounded-xl border border-border bg-surface p-6 shadow-soft">
             <button
               type="button"
-              className="absolute right-4 top-4 grid size-9 place-items-center rounded-md text-fg-muted hover:bg-surface-2 hover:text-fg"
+              className="absolute end-4 top-4 grid size-9 place-items-center rounded-md text-fg-muted hover:bg-surface-2 hover:text-fg"
               onClick={() => setWinner(null)}
-              aria-label="Close"
+              aria-label={t("close")}
             >
               <X className="size-4" />
             </button>
-            <p className="text-xs tracking-wide text-accent">Aid arrived</p>
-            <h2 className="mt-2 text-2xl font-medium">The million reached one of us</h2>
-            <p className="mt-3 text-sm text-fg-muted">This wallet received the House aid. A new round is open.</p>
-            <p className="mt-5 break-all rounded-md border border-border bg-surface-2 p-3 font-mono text-sm text-left" dir="ltr">
+            <p className="text-xs tracking-wide text-accent">{t("aidArrived")}</p>
+            <h2 className="mt-2 text-2xl font-medium">{t("millionReached")}</h2>
+            <p className="mt-3 text-sm text-fg-muted">{t("millionBody")}</p>
+            <p className="mt-5 break-all rounded-md border border-border bg-surface-2 p-3 text-left font-mono text-sm" dir="ltr">
               {winner}
             </p>
             <div className="mt-4 flex gap-2">
-              <CopyButton value={winner} size="default" variant="secondary" label="Copy wallet" />
+              <CopyButton value={winner} size="default" variant="secondary" label={t("copyWallet")} />
               <Button className="flex-1" onClick={() => setWinner(null)}>
-                Continue
+                {t("continue")}
                 <ArrowUpRight className="size-4" />
               </Button>
             </div>
@@ -431,6 +444,7 @@ function NetworkTab({
   children: ReactNode;
   recommended?: boolean;
 }) {
+  const { t } = useI18n();
   return (
     <button
       type="button"
@@ -441,7 +455,7 @@ function NetworkTab({
       )}
     >
       {children}
-      {recommended ? <span className="ml-1 text-[10px] text-accent">best</span> : null}
+      {recommended ? <span className="ms-1 text-[10px] text-accent">{t("best")}</span> : null}
     </button>
   );
 }

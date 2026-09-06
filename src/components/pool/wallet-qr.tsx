@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
+import { useI18n } from "@/lib/i18n";
 
 export function WalletQr({ value }: { value: string }) {
+  const { t } = useI18n();
   const [src, setSrc] = useState<string | null>(null);
 
   useEffect(() => {
@@ -27,13 +29,5 @@ export function WalletQr({ value }: { value: string }) {
     return <div className="size-full rounded-md bg-paper" aria-hidden />;
   }
 
-  return (
-    <img
-      src={src}
-      alt="House wallet QR code"
-      className="size-full"
-      width={280}
-      height={280}
-    />
-  );
+  return <img src={src} alt={t("qrAlt")} className="size-full" width={280} height={280} />;
 }
