@@ -320,7 +320,10 @@ export const contribute = createServerFn({ method: "POST" })
     if (typeof wallet !== "string") throw new Error("Enter a USDT wallet");
     if (network !== "trc20" && network !== "erc20") throw new Error("Unsupported network");
     const country = typeof countryRaw === "string" && isCountry(countryRaw) ? countryRaw : "Other";
-    return { wallet: wallet.trim(), network: network as Network, country };
+    const refRaw = "ref" in data ? data.ref : undefined;
+    const ref =
+      typeof refRaw === "string" && /^[a-z0-9]{4,12}$/i.test(refRaw.trim()) ? refRaw.trim().toLowerCase() : null;
+    return { wallet: wallet.trim(), network: network as Network, country, ref };
   })
   .handler(async ({ data }): Promise<ContributeResult> => {
     const wallet = data.wallet;
@@ -357,8 +360,8 @@ export const contribute = createServerFn({ method: "POST" })
     `;
     const isNewDonor = prior.length === 0;
     await sql`
-      insert into donations (round_id, payout_wallet, network, amount_usdt, client_stamp)
-      values (${round.id}, ${wallet}, ${detected}, ${UNIT_USDT}, ${stamp})
+      insert into donations (round_id, payout_wallet, network, amount_usdt, client_stamp, ref_slug)
+      values (${round.id}, ${wallet}, ${detected}, ${UNIT_USDT}, ${stamp}, ${data.ref})
     `;
     await sql`
       insert into members (payout_wallet, country, given_usdt)

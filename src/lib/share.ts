@@ -1,29 +1,44 @@
 import { SHARE_COPY, type Lang } from "@/lib/i18n";
+import { refSlug } from "@/lib/ref";
 
-export function pageUrl(): string {
+export function pageOrigin(): string {
   if (typeof window === "undefined") return "";
-  return `${window.location.origin}/`;
+  return window.location.origin;
+}
+
+/** Join landing URL; optional `ref` is a short wallet hash slug (not the wallet). */
+export function pageUrl(ref?: string | null): string {
+  const origin = pageOrigin();
+  if (!origin) return "/";
+  const base = `${origin}/`;
+  if (!ref) return base;
+  return `${base}?ref=${encodeURIComponent(ref)}`;
+}
+
+export function inviteRef(wallet?: string | null): string | null {
+  if (!wallet?.trim()) return null;
+  return refSlug(wallet);
 }
 
 export function shareTitle(lang: Lang = "ar"): string {
   return lang === "ar" ? "واحد · عائلة العضد" : "Wahid · The ʿAḍud";
 }
 
-export function shareMessage(lang: Lang = "ar"): string {
-  return `${SHARE_COPY[lang]}\n\n${pageUrl()}`;
+export function shareMessage(lang: Lang = "ar", ref?: string | null): string {
+  return `${SHARE_COPY[lang]}\n\n${pageUrl(ref)}`;
 }
 
-export function whatsappHref(lang: Lang = "ar"): string {
-  return `https://wa.me/?text=${encodeURIComponent(shareMessage(lang))}`;
+export function whatsappHref(lang: Lang = "ar", ref?: string | null): string {
+  return `https://wa.me/?text=${encodeURIComponent(shareMessage(lang, ref))}`;
 }
 
-export function xHref(lang: Lang = "ar"): string {
-  return `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage(lang))}`;
+export function xHref(lang: Lang = "ar", ref?: string | null): string {
+  return `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage(lang, ref))}`;
 }
 
-export async function nativeShare(lang: Lang = "ar"): Promise<"shared" | "copied" | "closed"> {
-  const text = shareMessage(lang);
-  const url = pageUrl();
+export async function nativeShare(lang: Lang = "ar", ref?: string | null): Promise<"shared" | "copied" | "closed"> {
+  const text = shareMessage(lang, ref);
+  const url = pageUrl(ref);
   if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
     try {
       await navigator.share({ title: shareTitle(lang), text, url });
