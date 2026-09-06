@@ -37,7 +37,7 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
   const queryClient = useQueryClient();
   const [wallet, setWallet] = useState("");
   const [network, setNetwork] = useState<Network>("trc20");
-  const [country, setCountry] = useState("Saudi Arabia");
+  const [country, setCountry] = useState("Other");
   const [winner, setWinner] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [shareOpen, setShareOpen] = useState(false);

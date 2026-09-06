@@ -13,32 +13,32 @@ export const USDT_CONTRACTS = {
 } as const;
 
 export const COUNTRIES = [
-  "Saudi Arabia",
-  "United Arab Emirates",
-  "Kuwait",
-  "Qatar",
-  "Bahrain",
-  "Oman",
-  "Egypt",
-  "Jordan",
-  "Morocco",
   "Algeria",
-  "Tunisia",
-  "Iraq",
-  "Yemen",
-  "Turkey",
-  "Pakistan",
+  "Bahrain",
+  "Canada",
+  "Egypt",
+  "France",
+  "Germany",
   "India",
   "Indonesia",
-  "Malaysia",
-  "United States",
-  "United Kingdom",
-  "Germany",
-  "France",
-  "Canada",
-  "Nigeria",
+  "Iraq",
+  "Jordan",
   "Kenya",
+  "Kuwait",
+  "Malaysia",
+  "Morocco",
+  "Nigeria",
+  "Oman",
+  "Pakistan",
+  "Qatar",
+  "Saudi Arabia",
   "South Africa",
+  "Tunisia",
+  "Turkey",
+  "United Arab Emirates",
+  "United Kingdom",
+  "United States",
+  "Yemen",
   "Other",
 ] as const;
 
@@ -201,11 +201,9 @@ export function formatTimeAgo(iso: string, now = Date.now(), lang: "ar" | "en" =
   return new Intl.DateTimeFormat(lang === "ar" ? "ar" : "en", { dateStyle: "medium" }).format(new Date(iso));
 }
 
-export function countryFromWallet(wallet: string, stored?: string | null): string {
-  if (stored && stored !== "Other" && stored !== "Unknown") return stored;
-  let h = 0;
-  for (let i = 0; i < wallet.length; i++) h = (h * 33 + wallet.charCodeAt(i)) >>> 0;
-  return COUNTRIES[h % COUNTRIES.length];
+export function countryFromWallet(_wallet: string, stored?: string | null): string {
+  if (stored && stored !== "Unknown" && stored.trim()) return stored;
+  return "Other";
 }
 
 export const WALLET_STORAGE_KEY = "waahid-wallet";

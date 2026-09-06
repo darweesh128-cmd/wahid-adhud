@@ -38,5 +38,5 @@ insert into messages (from_wallet, to_wallet, body)
 select
   'TVmEo3Mn6dJfAWgk8KUF7rEvcdbdegmDER',
   payout_wallet,
-  'The House is open. This desk is yours — ledger, messages, any Adhud. Your dollar is an arm.'
+  'The House is open. This desk is yours. Your dollar is an arm.'
 from members;
