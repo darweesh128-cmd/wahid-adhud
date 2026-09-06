@@ -174,13 +174,26 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
                 <ScanLine className="size-4 text-accent" />
                 <h2 className="text-sm font-medium">{t("houseWallet")}</h2>
               </div>
-              <Badge variant="outline">{network === "trc20" ? "TRC-20" : "ERC-20"}</Badge>
+              <Badge variant="outline">TRC-20 · 5 USDT</Badge>
             </div>
-            <div className="mt-4 grid grid-cols-2 gap-1 rounded-lg bg-surface-2 p-1">
+
+            <div className="mt-5 space-y-3">
+              <p className="text-xs font-medium text-accent">{t("joinFlowTitle")}</p>
+              <JoinFlowStep n="1" title={t("joinFlow1t")}>{t("joinFlow1")}</JoinFlowStep>
+              <JoinFlowStep n="2" title={t("joinFlow2t")}>{t("joinFlow2")}</JoinFlowStep>
+              <JoinFlowStep n="3" title={t("joinFlow3t")}>{t("joinFlow3")}</JoinFlowStep>
+            </div>
+
+            <div className="mt-4 space-y-2 rounded-md border border-danger/30 bg-danger/5 px-3 py-2.5 text-xs leading-relaxed text-fg-muted">
+              <p>{t("joinWarnNetwork")}</p>
+              <p>{t("joinWarnAmount")}</p>
+            </div>
+
+            <div className="mt-5 grid grid-cols-2 gap-1 rounded-lg bg-surface-2 p-1">
               <NetworkTab active={network === "trc20"} onClick={() => setNetwork("trc20")} recommended>
                 TRC-20
               </NetworkTab>
-              <NetworkTab active={network === "erc20"} onClick={() => setNetwork("erc20")}>
+              <NetworkTab active={network === "erc20"} onClick={() => setNetwork("erc20")} advanced>
                 ERC-20
               </NetworkTab>
             </div>
@@ -448,11 +461,13 @@ function NetworkTab({
   onClick,
   children,
   recommended,
+  advanced,
 }: {
   active: boolean;
   onClick: () => void;
   children: ReactNode;
   recommended?: boolean;
+  advanced?: boolean;
 }) {
   const { t } = useI18n();
   return (
@@ -466,7 +481,22 @@ function NetworkTab({
     >
       {children}
       {recommended ? <span className="ms-1 text-[10px] text-accent">{t("best")}</span> : null}
+      {advanced ? <span className="ms-1 text-[10px] text-fg-subtle">{t("advanced")}</span> : null}
     </button>
+  );
+}
+
+function JoinFlowStep({ n, title, children }: { n: string; title: string; children: ReactNode }) {
+  return (
+    <div className="flex gap-3 rounded-md border border-border bg-surface-2 px-3 py-2.5">
+      <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-soft font-mono text-[11px] text-accent">
+        {n}
+      </span>
+      <div className="min-w-0">
+        <p className="text-sm font-medium">{title}</p>
+        <p className="mt-1 text-xs leading-relaxed text-fg-muted">{children}</p>
+      </div>
+    </div>
   );
 }
 

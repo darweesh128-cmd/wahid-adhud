@@ -1,24 +1,26 @@
 # Wahid · The Adhud
 
-Wallet-level mutual aid. No account. No KYC. One dollar USDT.
+Wallet-level mutual aid. No account. No KYC. Five USDT on TRC-20.
 
 You may be fine today. Someone else is not.
 
 ## The example
 
-The House page shows **the total** and **the dollars moving**.
+The House page shows **the total** and **the gifts moving**.
 
 - Center of the graph is the running USDT total this round.
-- Each pulse is **$1** leaving an Adhud toward the House.
+- Each pulse is **5 USDT** leaving an Adhud toward the House.
 - Clusters are the countries members can serve from.
 - Target: **1,000,000 USDT**. At one million, aid lands with one Adhud.
 
 ## Join
 
-1. Scan the House QR (TRC-20 USDT).
-2. Send **1 USDT**.
-3. Enter your payout wallet and the country you can serve from.
+1. Open your exchange (Binance, etc.) and choose **Withdraw USDT**.
+2. Select network **TRC-20 (Tron)** and send **5 USDT** to the House address below.
+3. Enter your payout wallet and the country you can serve from on the site.
 4. You are an Adhud. Your desk is your wallet.
+
+**Warning:** wrong network = lost funds. Send exactly **5 USDT** on **TRC-20**.
 
 House TRC-20: `TVmEo3Mn6dJfAWgk8KUF7rEvcdbdegmDER`
 
