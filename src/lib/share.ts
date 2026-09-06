@@ -6,7 +6,7 @@ export function pageUrl(): string {
 }
 
 export function shareTitle(lang: Lang = "ar"): string {
-  return lang === "ar" ? "واحد · عائلة العضد" : "Wahid · The Adhud";
+  return lang === "ar" ? "واحد · عائلة العضد" : "Wahid · The ʿAḍud";
 }
 
 export function shareMessage(lang: Lang = "ar"): string {

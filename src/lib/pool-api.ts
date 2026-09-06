@@ -52,7 +52,7 @@ const HOURLY_CAP = 12;
 const OWNER_ATTEMPT_CAP = 8;
 const MESSAGE_CAP = 30;
 const HOUSE_WELCOME =
-  "The House is open. This desk is yours — ledger, messages, any Adhud. Your dollar is an arm.";
+  "The House is open. This desk is yours — ledger, messages, any ʿAḍīd. Your dollar is an arm.";
 
 function hashStamp(ip: string): string {
   return createHash("sha256").update(`waahid:${ip}`).digest("hex").slice(0, 20);

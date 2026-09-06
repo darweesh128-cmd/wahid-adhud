@@ -18,7 +18,7 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "واحد — عائلة العضد. قد تكون بخير اليوم. غيرك ليس كذلك. ادفع 1 USDT. تصبح عضيداً. Wahid · The Adhud.",
+          "واحد — عائلة العضد. قد تكون بخير اليوم. غيرك ليس كذلك. ادفع 1 USDT. تصبح عضيداً. ادخل لأنك عضُد أحد.",
       },
       { name: "theme-color", content: "#090B0A" },
     ],

@@ -143,7 +143,17 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
             <span className="mt-2 block text-fg-muted">{t("storyH1b")}</span>
           </h1>
           <p className="mt-6 max-w-xl text-base leading-relaxed text-fg sm:text-lg">{t("storyP1")}</p>
-          <p className="mt-4 max-w-xl text-sm leading-relaxed text-fg-muted sm:text-base">{t("storyP2")}</p>
+          <dl className="mt-6 max-w-xl space-y-4 border-s-2 border-accent ps-4">
+            <div>
+              <dt className="text-sm font-medium tracking-wide text-accent">{t("storyEtymWord1")}</dt>
+              <dd className="mt-1 text-sm leading-relaxed text-fg-muted sm:text-base">{t("storyEtym1")}</dd>
+            </div>
+            <div>
+              <dt className="text-sm font-medium tracking-wide text-accent">{t("storyEtymWord2")}</dt>
+              <dd className="mt-1 text-sm leading-relaxed text-fg-muted sm:text-base">{t("storyEtym2")}</dd>
+            </div>
+          </dl>
+          <p className="mt-6 max-w-xl text-sm leading-relaxed text-fg-muted sm:text-base">{t("storyP2")}</p>
           <div className="mt-8 flex flex-wrap gap-2">
             <Button size="lg" onClick={scrollToJoin}>
               {t("joinCta")}
