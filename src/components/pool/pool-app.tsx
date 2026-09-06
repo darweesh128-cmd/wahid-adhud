@@ -13,6 +13,8 @@ import { NetworkMap } from "@/components/pool/network-map";
 import { ShareOverlay } from "@/components/pool/share-panel";
 import { WalletQr } from "@/components/pool/wallet-qr";
 import { contribute, getNetwork, getPool } from "@/lib/pool-api";
+import { inviteRef } from "@/lib/share";
+import { captureRefFromSearch, getStoredRef } from "@/lib/ref";
 import {
   COUNTRIES,
   COUNTRY_STORAGE_KEY,
@@ -54,6 +56,7 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
     } catch {
       /* ignore */
     }
+    captureRefFromSearch(window.location.search);
   }, []);
 
   useEffect(() => {
@@ -81,7 +84,7 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
   const graph = networkQuery.data ?? initialNetwork;
 
   const mutation = useMutation({
-    mutationFn: () => contribute({ data: { wallet: trimmed, network, country } }),
+    mutationFn: () => contribute({ data: { wallet: trimmed, network, country, ref: getStoredRef() } }),
     onSuccess: (result) => {
       if (!result.ok) {
         toast.error(result.error);
@@ -423,7 +426,15 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
         )}
       </div>
 
-      <ShareOverlay open={shareOpen} justJoined={justJoined} onClose={() => setShareOpen(false)} />
+      <ShareOverlay
+        open={shareOpen}
+        justJoined={justJoined}
+        ref={inviteRef(trimmed) ?? getStoredRef()}
+        onClose={() => {
+          setShareOpen(false);
+          setJustJoined(false);
+        }}
+      />
 
       {winner ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-bg/80 p-5">

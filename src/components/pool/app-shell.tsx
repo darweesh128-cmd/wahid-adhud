@@ -3,7 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { SiteHeader } from "@/components/pool/site-header";
 import { ShareOverlay } from "@/components/pool/share-panel";
 import { getPool } from "@/lib/pool-api";
-import { OWNER_STORAGE_KEY, type PoolSnapshot } from "@/lib/pool";
+import { captureRefFromSearch } from "@/lib/ref";
+import { inviteRef } from "@/lib/share";
+import { OWNER_STORAGE_KEY, WALLET_STORAGE_KEY, type PoolSnapshot } from "@/lib/pool";
 
 export function AppShell({
   initial,
@@ -15,13 +17,16 @@ export function AppShell({
   const [ownerMode, setOwnerMode] = useState(false);
   const [logoTaps, setLogoTaps] = useState(0);
   const [shareOpen, setShareOpen] = useState(false);
+  const [me, setMe] = useState("");
 
   useEffect(() => {
     try {
       if (localStorage.getItem(OWNER_STORAGE_KEY) === "1") setOwnerMode(true);
+      setMe(localStorage.getItem(WALLET_STORAGE_KEY) ?? "");
     } catch {
       /* ignore */
     }
+    captureRefFromSearch(window.location.search);
   }, []);
 
   useEffect(() => {
@@ -62,7 +67,7 @@ export function AppShell({
         onRevealed={() => setOwnerMode(true)}
       />
       {children}
-      <ShareOverlay open={shareOpen} onClose={() => setShareOpen(false)} />
+      <ShareOverlay open={shareOpen} ref={inviteRef(me)} onClose={() => setShareOpen(false)} />
     </div>
   );
 }

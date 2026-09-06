@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CopyButton } from "@/components/pool/copy-button";
+import { InviteCard } from "@/components/pool/share-panel";
 import { getInbox, getMember, getNetwork, getThread, sendMessage } from "@/lib/pool-api";
 import { HOUSE_WALLET, formatTimeAgo, isValidWallet, type MemberProfile } from "@/lib/pool";
 import { countryLabel, useI18n } from "@/lib/i18n";
@@ -114,6 +115,7 @@ export function MemberDesk({ wallet }: { wallet: string }) {
             <Link to="/network">{t("openNetwork")}</Link>
           </Button>
         </div>
+        <InviteCard wallet={wallet} />
       </aside>
 
       <section className="flex min-h-[480px] flex-col rounded-xl border border-border bg-surface p-5">

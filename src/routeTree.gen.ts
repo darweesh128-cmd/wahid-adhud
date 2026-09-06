@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NetworkRouteImport } from './routes/network'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AdhudWalletRouteImport } from './routes/adhud.$wallet'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,6 +25,16 @@ const NetworkRoute = NetworkRouteImport.update({
   path: '/network',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdhudWalletRoute = AdhudWalletRouteImport.update({
   id: '/adhud/$wallet',
   path: '/adhud/$wallet',
@@ -32,30 +44,45 @@ const AdhudWalletRoute = AdhudWalletRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/network': typeof NetworkRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/adhud/$wallet': typeof AdhudWalletRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/network': typeof NetworkRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/adhud/$wallet': typeof AdhudWalletRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/network': typeof NetworkRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/adhud/$wallet': typeof AdhudWalletRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/network' | '/adhud/$wallet'
+  fullPaths:
+    '/' | '/network' | '/robots.txt' | '/sitemap.xml' | '/adhud/$wallet'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/network' | '/adhud/$wallet'
-  id: '__root__' | '/' | '/network' | '/adhud/$wallet'
+  to: '/' | '/network' | '/robots.txt' | '/sitemap.xml' | '/adhud/$wallet'
+  id:
+    | '__root__'
+    | '/'
+    | '/network'
+    | '/robots.txt'
+    | '/sitemap.xml'
+    | '/adhud/$wallet'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   NetworkRoute: typeof NetworkRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AdhudWalletRoute: typeof AdhudWalletRoute
 }
 
@@ -75,6 +102,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NetworkRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/adhud/$wallet': {
       id: '/adhud/$wallet'
       path: '/adhud/$wallet'
@@ -88,6 +129,8 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   NetworkRoute: NetworkRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   AdhudWalletRoute: AdhudWalletRoute,
 }
 export const routeTree = rootRouteImport
