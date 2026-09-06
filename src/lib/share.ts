@@ -20,23 +20,23 @@ export function inviteRef(wallet?: string | null): string | null {
   return refSlug(wallet);
 }
 
-export function shareTitle(lang: Lang = "ar"): string {
+export function shareTitle(lang: Lang = "en"): string {
   return lang === "ar" ? "واحد · عائلة العضد" : "Wahid · The ʿAḍud";
 }
 
-export function shareMessage(lang: Lang = "ar", ref?: string | null): string {
+export function shareMessage(lang: Lang = "en", ref?: string | null): string {
   return `${SHARE_COPY[lang]}\n\n${pageUrl(ref)}`;
 }
 
-export function whatsappHref(lang: Lang = "ar", ref?: string | null): string {
+export function whatsappHref(lang: Lang = "en", ref?: string | null): string {
   return `https://wa.me/?text=${encodeURIComponent(shareMessage(lang, ref))}`;
 }
 
-export function xHref(lang: Lang = "ar", ref?: string | null): string {
+export function xHref(lang: Lang = "en", ref?: string | null): string {
   return `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage(lang, ref))}`;
 }
 
-export async function nativeShare(lang: Lang = "ar", ref?: string | null): Promise<"shared" | "copied" | "closed"> {
+export async function nativeShare(lang: Lang = "en", ref?: string | null): Promise<"shared" | "copied" | "closed"> {
   const text = shareMessage(lang, ref);
   const url = pageUrl(ref);
   if (typeof navigator !== "undefined" && typeof navigator.share === "function") {

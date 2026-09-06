@@ -344,17 +344,19 @@ type I18nValue = {
 
 const I18nContext = createContext<I18nValue | null>(null);
 
-export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("ar");
+function readSavedLang(): Lang {
+  if (typeof window === "undefined") return "en";
+  try {
+    const saved = localStorage.getItem(LANG_KEY);
+    if (saved === "en" || saved === "ar") return saved;
+  } catch {
+    /* ignore */
+  }
+  return "en";
+}
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(LANG_KEY);
-      if (saved === "en" || saved === "ar") setLangState(saved);
-    } catch {
-      /* ignore */
-    }
-  }, []);
+export function I18nProvider({ children }: { children: ReactNode }) {
+  const [lang, setLangState] = useState<Lang>(readSavedLang);
 
   useEffect(() => {
     const dir = lang === "ar" ? "rtl" : "ltr";

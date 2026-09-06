@@ -7,9 +7,7 @@ import { I18nProvider, useI18n } from "@/lib/i18n";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import appCss from "../styles.css?url";
 
-const APP_NAME = "واحد · عائلة العضد";
-const APP_DESCRIPTION_AR =
-  "انضم بـ 5 USDT على TRC-20. عائلة العضد — مساعدة متبادلة بلا حساب ولا KYC. محفظتك هي هويتك.";
+const APP_NAME = "Wahid · The ʿAḍud";
 const APP_DESCRIPTION_EN =
   "Join with 5 USDT on TRC-20. Wahid · The ʿAḍud — wallet-level mutual aid. No account. No KYC.";
 
@@ -18,16 +16,16 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: `${APP_NAME} · 5 USDT TRC-20` },
-      { name: "description", content: APP_DESCRIPTION_AR },
+      { title: `${APP_NAME} · Join with 5 USDT TRC-20` },
+      { name: "description", content: APP_DESCRIPTION_EN },
       { name: "theme-color", content: "#090B0A" },
-      { property: "og:title", content: `${APP_NAME} · انضم بـ 5 USDT` },
-      { property: "og:description", content: APP_DESCRIPTION_AR },
+      { property: "og:title", content: `${APP_NAME} · Join with 5 USDT` },
+      { property: "og:description", content: APP_DESCRIPTION_EN },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: `${APP_NAME} · 5 USDT mutual aid` },
       { name: "twitter:description", content: APP_DESCRIPTION_EN },
-      { name: "keywords", content: "Wahid, Adhud, 5 USDT, TRC-20, mutual aid, عائلة العضد, مساعدة متبادلة" },
+      { name: "keywords", content: "Wahid, Adhud, 5 USDT, TRC-20, mutual aid, USDT pool, عائلة العضد" },
     ],
     links: [
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
@@ -59,7 +57,7 @@ function RootDocument() {
   );
 
   return (
-    <html lang="ar" dir="rtl" className="antialiased" suppressHydrationWarning>
+    <html lang="en" dir="ltr" className="antialiased" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>

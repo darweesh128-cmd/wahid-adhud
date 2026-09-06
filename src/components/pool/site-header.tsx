@@ -51,17 +51,6 @@ export function SiteHeader({
         <div className="inline-flex h-9 items-center rounded-md border border-border p-0.5">
           <button
             type="button"
-            onClick={() => setLang("ar")}
-            className={cn(
-              "h-8 min-w-9 rounded px-2 text-[11px]",
-              lang === "ar" ? "bg-surface-2 text-fg" : "text-fg-muted hover:text-fg",
-            )}
-            aria-pressed={lang === "ar"}
-          >
-            عربي
-          </button>
-          <button
-            type="button"
             onClick={() => setLang("en")}
             className={cn(
               "h-8 min-w-9 rounded px-2 text-[11px]",
@@ -70,6 +59,17 @@ export function SiteHeader({
             aria-pressed={lang === "en"}
           >
             EN
+          </button>
+          <button
+            type="button"
+            onClick={() => setLang("ar")}
+            className={cn(
+              "h-8 min-w-9 rounded px-2 text-[11px]",
+              lang === "ar" ? "bg-surface-2 text-fg" : "text-fg-muted hover:text-fg",
+            )}
+            aria-pressed={lang === "ar"}
+          >
+            عربي
           </button>
         </div>
         <Link
