@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { checkAdhudUsername, createAdhudAccount, suggestAdhudUsername } from "@/lib/account-api";
-import { COUNTRIES, ACCOUNT_USERNAME_STORAGE_KEY, isCountry } from "@/lib/pool";
+import { COUNTRIES, ACCOUNT_USERNAME_STORAGE_KEY, CHECKOUT_SESSION_STORAGE_KEY, isCountry } from "@/lib/pool";
 import { getStoredRef } from "@/lib/ref";
 import { countryLabel, useI18n } from "@/lib/i18n";
 import { usernameHint } from "@/lib/username";
@@ -73,6 +73,7 @@ export function JoinAccountPanel({ country, onCountryChange, onJoined }: JoinAcc
       }
       try {
         localStorage.setItem(ACCOUNT_USERNAME_STORAGE_KEY, result.username);
+        localStorage.setItem(CHECKOUT_SESSION_STORAGE_KEY, result.sessionId);
         if (isCountry(country)) {
           localStorage.setItem("waahid-country", country);
         }

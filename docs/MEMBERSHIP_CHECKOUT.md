@@ -1,19 +1,34 @@
 # Membership checkout (v2)
 
-Wahid product: **$1 USD membership** via username-first account creation, then **Stripe Checkout (test mode)**. Legacy **5 USDT** join stays available until cutover.
+Wahid product: **$1 USD membership** via username-first account creation, then **card checkout** (Suby live MoR preferred, Stripe test/mock for dev). Legacy **5 USDT** join stays available until cutover.
 
-**Payment provider:** Stripe Checkout (preferred). Lemon Squeezy is not wired.
+**Live payment target:** [Suby](https://www.suby.fi) — Merchant of Record (FR entity Suby SAS). Customer pays by card (+ APMs); merchant receives **USDC** to wallet. No US bank account or EIN required.
 
-> **Note:** US company formation (e.g. separate Wyoming LLC workstream) is **not a dependency** for building, testing, or merging this product path. Ship the flagged v2 flow with test keys or the mock simulator now.
+Signup: https://app.suby.fi  
+Docs: https://documentation.suby.fi/llms.txt · https://docs.suby.fi/v3-beta/
 
-## Feature flag
+**Not required for go-live:** Stripe live keys, Lemon Squeezy (closed — do not merge).
+
+## Feature flags
 
 | Variable | Where | Effect |
 |----------|--------|--------|
 | `VITE_MEMBERSHIP_CHECKOUT_V2=true` | Build / client | Shows Open account + $1 flow |
 | `MEMBERSHIP_CHECKOUT_V2=true` | Server | Enables account APIs, checkout, webhooks |
+| `MEMBERSHIP_PROVIDER` | Server | `suby` \| `stripe` \| `mock` (see below) |
 
 **Default (flag off):** existing 5 USDT join only — production unchanged today.
+
+## Provider selection (`MEMBERSHIP_PROVIDER`)
+
+| Value | When | Notes |
+|-------|------|--------|
+| `suby` | Live card → USDC | **Production target** — Mohamad confirmed |
+| `stripe` | Dev / legacy test | Stripe Checkout **test mode** (`sk_test_*`) |
+| `mock` | Local QA | Built-in simulator at `/checkout/mock` |
+| *(unset)* | Auto | Suby if `SUBY_API_KEY` set, else Stripe test, else mock |
+
+Force mock even with keys: `MEMBERSHIP_CHECKOUT_MOCK=true`
 
 ## Product flow (flag on)
 
@@ -22,24 +37,15 @@ Open account · $1
     → Pick unique username (+ suggest, availability check)
     → Create account & pay $1 (adhud_accounts row first, status=pending)
     → Checkout:
-         • Stripe Checkout TEST when STRIPE_SECRET_KEY=sk_test_...
-         • Mock simulator at /checkout/mock when no Stripe key
-    → Payment success (webhook or mock)
-    → Membership active; ledger display_name=@username
+         • Suby v3 hosted session (cs_…) when MEMBERSHIP_PROVIDER=suby
+         • Stripe Checkout TEST when MEMBERSHIP_PROVIDER=stripe
+         • Mock simulator at /checkout/mock when mock
+    → Payment success (webhook — never trust redirect alone)
+    → activateAccountMembership (shared fulfillment)
     → Desk at /member/{username}
 ```
 
-## Checkout modes (build & test now)
-
-| Mode | When | Notes |
-|------|------|--------|
-| **mock** | No `sk_test_...` (default in dev) | `/checkout/mock` — zero external setup |
-| **stripe** | `STRIPE_SECRET_KEY=sk_test_...` | Hosted Checkout **test mode** |
-| **off** | Flag off | Legacy USDT only |
-
-Force mock with test keys set: `MEMBERSHIP_CHECKOUT_MOCK=true`
-
-## Environment variables (placeholders — no secrets in git)
+## Environment variables (names only — no secrets in git)
 
 ### Enable v2 (dev / staging / preview)
 
@@ -48,13 +54,32 @@ VITE_MEMBERSHIP_CHECKOUT_V2=true
 MEMBERSHIP_CHECKOUT_V2=true
 ```
 
-### Stripe test mode (use now)
+### Suby (live MoR — production target)
 
 ```
+MEMBERSHIP_PROVIDER=suby
+SUBY_API_KEY=                          # sk_live_… or sk_sandbox_…
+SUBY_WEBHOOK_SECRET=                     # whsec_… from dashboard
+SUBY_PRODUCT_ID=                         # pro_… one-time $1 product (optional on v3)
+SUBY_PRICE_CENTS=100                     # optional ad-hoc price if no product (v3 default: 100)
+SUBY_API_VERSION=v3                      # optional; default v3. Set v2 for legacy /api/*
+SUBY_API_BASE_URL=https://api.beta.suby.fi  # optional; v3 default
+BETTER_AUTH_URL=https://www.adhud.xyz
+```
+
+### Stripe test mode (dev only)
+
+```
+MEMBERSHIP_PROVIDER=stripe
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 STRIPE_PRICE_ID=price_...              # optional; inline $1 price_data if omitted
-BETTER_AUTH_URL=https://www.adhud.xyz
+```
+
+### Mock simulator
+
+```
+MEMBERSHIP_PROVIDER=mock
 ```
 
 ### Optional
@@ -64,20 +89,41 @@ MEMBERSHIP_CHECKOUT_MOCK=true
 VITE_PUBLIC_HOSTNAME=www.adhud.xyz
 ```
 
-## TODO — production live keys (CEO request only, later)
+## Suby dashboard setup (ops checklist)
 
-Do **not** add live keys in this PR. When the CEO requests go-live:
+Complete in [Suby dashboard](https://app.suby.fi) before enabling `MEMBERSHIP_PROVIDER=suby` on production:
 
-- [ ] **TODO:** Obtain `sk_live_...` and live webhook secret from CEO / ops (not self-serve)
-- [ ] **TODO:** Confirm payout destination entity + bank are ready (separate from Wahid product work)
-- [ ] **TODO:** Set `ALLOW_STRIPE_LIVE=true` only after CEO sign-off
-- [ ] **TODO:** Point `STRIPE_SECRET_KEY` at live key in production env (never commit)
-- [ ] **TODO:** Register live webhook URL `POST /api/stripe/webhook` in Stripe dashboard
-- [ ] **TODO:** Decide USDT cutover — hide secondary panel when card path is primary
+- [ ] Create merchant account (Suby SAS MoR — no US entity required)
+- [ ] **Card Request:** submit proof of business for card acceptance approval
+- [ ] Create **one-time** product: **$1.00 USD**, card + APMs — copy `SUBY_PRODUCT_ID` (or use ad-hoc `SUBY_PRICE_CENTS` on v3)
+- [ ] Configure **USDC wallet payout**
+- [ ] Copy `SUBY_API_KEY` into deploy env (never commit)
+- [ ] Register webhook URL: `POST https://www.adhud.xyz/api/suby/webhook`
+- [ ] Copy webhook secret → `SUBY_WEBHOOK_SECRET`
+- [ ] Sandbox test with `sk_sandbox_…` on preview (`MEMBERSHIP_CHECKOUT_V2=true`)
+- [ ] Verify **`checkout.succeeded`** (v3) or **`CHECKOUT_SUCCESS`** (v2) activates membership — not redirect alone
 
-Until then, the server **ignores `sk_live_*`** unless `ALLOW_STRIPE_LIVE=true` (safety gate).
+### Suby API (Mohamad-confirmed)
 
-## API surface
+| Integration | Endpoint | Base URL |
+|-------------|----------|----------|
+| **v3 checkout (default)** | `POST /v3/checkout/sessions` | `https://api.beta.suby.fi` |
+| Poll session | `GET /v3/checkout/sessions/{id}` | status `COMPLETED` |
+| Legacy one-time | `POST /api/payment/create` | `https://api.suby.fi` (`SUBY_API_VERSION=v2`) |
+
+Auth: header `X-Suby-Api-Key`
+
+### Webhooks — grant membership on
+
+| Event | API | When to fulfill |
+|-------|-----|-----------------|
+| `checkout.succeeded` | v3 | Card hosted checkout complete (**primary**) |
+| `CHECKOUT_SUCCESS` | v2 legacy | Card checkout authorized |
+| `payment.succeeded` | v3 | Accepted (idempotent; also fires after capture) |
+
+Verify: HMAC-SHA256 of ``${timestamp}.${rawBody}`` → `X-Webhook-Signature: v1=…`
+
+## API surface (Wahid)
 
 | Endpoint / function | Purpose |
 |-------------------|---------|
@@ -85,7 +131,8 @@ Until then, the server **ignores `sk_live_*`** unless `ALLOW_STRIPE_LIVE=true` (
 | `checkAdhudUsername` | Uniqueness check |
 | `createAdhudAccount` | Create account → checkout URL |
 | `payMockCheckout` | Complete mock payment |
-| `POST /api/stripe/webhook` | Stripe `checkout.session.completed` |
+| `POST /api/suby/webhook` | Suby signed payment events |
+| `POST /api/stripe/webhook` | Stripe `checkout.session.completed` (dev) |
 | `GET /checkout/mock` | Payment simulator (no keys) |
 
 ## Database
@@ -93,18 +140,27 @@ Until then, the server **ignores `sk_live_*`** unless `ALLOW_STRIPE_LIVE=true` (
 - `migrations/0008_membership_checkout.sql` — `membership_payments`
 - `migrations/0009_adhud_accounts.sql` — `adhud_accounts`, `donations.display_name`, `members.username`
 
+`membership_payments.stripe_session_id` stores the external checkout reference (`cs_…`, `pay_…`, Stripe `cs_…`, or mock id).
+
 ## Test plan
 
-### Mock simulator (no Stripe account)
+### Mock simulator (no external keys)
 
-1. `VITE_MEMBERSHIP_CHECKOUT_V2=true` + `MEMBERSHIP_CHECKOUT_V2=true`
+1. `MEMBERSHIP_PROVIDER=mock` + v2 flags
 2. **Open account · $1** → username → **Create account & pay $1**
 3. `/checkout/mock` → **Simulate successful payment**
 4. `@username` on ledger; `/member/{username}` desk
 
-### Stripe test mode
+### Suby sandbox (v3)
 
-1. Stripe dashboard → **test mode** → copy `sk_test_...`
+1. https://app.suby.fi → sandbox key + optional $1 product
+2. Set `MEMBERSHIP_PROVIDER=suby`, `SUBY_API_KEY`, `SUBY_WEBHOOK_SECRET`, `SUBY_PRODUCT_ID` (or `SUBY_PRICE_CENTS`)
+3. Forward webhooks to preview `/api/suby/webhook`
+4. Complete card checkout → membership activates via `checkout.succeeded` webhook
+
+### Stripe test mode (legacy dev)
+
+1. `MEMBERSHIP_PROVIDER=stripe` + `sk_test_...`
 2. `stripe listen --forward-to localhost:8080/api/stripe/webhook`
 3. Card `4242 4242 4242 4242` → membership activates via webhook
 
