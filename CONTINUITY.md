@@ -1,7 +1,7 @@
 # Wahid · The Adhud — Continuity (Cursor-ready)
 
 **Purpose:** Resume from Cursor or Grok Bot anytime. **No secrets in this file.**  
-**Last updated:** 2026-09-07 ~17:25 UTC  
+**Last updated:** 2026-09-07 ~14:30 UTC (Suby cutover)  
 **Scope lock:** `darweesh128-cmd/wahid-adhud` only — do not touch other projects.
 
 ## Snapshot (NOW)
@@ -12,7 +12,7 @@
 | Apex | https://adhud.xyz → 308 → www |
 | Production join | **LIVE** — **Open account · $1** on https://www.adhud.xyz (HTTP 200, verified curl) |
 | SEO | Title/meta/og say **Open account · $1** (no 5 USDT lead) |
-| $1 backup preview | **https://temporary-rushing-gold-1hh66hx.vercel.app** HTTP 200 · claim `040d70fe-4689-4785-a3f2-544d003c2565` (expires ~60m) |
+| $1 backup preview | **https://temporary-swift-bugle-b7vgu37.vercel.app** · claim https://vercel.com/claim-deployment?code=88d80732-e5d4-45b9-ae5b-e35dbb893aa6 (Mohamad → `wahid-adhud` project if git deploy stuck) |
 | Checkout mode | **Suby target baked** in `vercel.json` (`MEMBERSHIP_PROVIDER=suby`, product/price/v3); live checkout awaits ops vault: `SUBY_API_KEY` + `SUBY_WEBHOOK_SECRET` |
 | Legacy USDT | **5 USDT TRC-20** collapsible **Or join with USDT** (House `TVmEo3Mn6dJfAWgk8KUF7rEvcdbdegmDER`) |
 | $1 membership | PR #7 + #15 v2 default ON; **Suby MoR merged PR #20**; SEO fix PR #17 live on www |
@@ -28,7 +28,7 @@
 |------|--------|
 | GitHub | https://github.com/darweesh128-cmd/wahid-adhud |
 | Default branch | `main` |
-| Tip (at continuity write) | `2825621` — SEO redeploy live on www; PR #21 closed (superseded) |
+| Tip (at continuity write) | `df89009` — Suby env baked (PR #23) + urgent production redeploy trigger |
 
 ### Merged PRs
 #20 Suby · #17 SEO · #15 v2 default · #14 preview · #13 build env · #12 vercel.json · #7 membership $1 · #6 English-only
@@ -42,6 +42,23 @@
 - Stripe live (`sk_live_*`) — blocked until `ALLOW_STRIPE_LIVE=true` (legacy dev path only)
 - Stripe test (`sk_test_*`) — used if in Vercel env; else **mock** `/checkout/mock`
 - `DATABASE_URL` — secrets only; Neon `wahid-adhud` / `little-field-83907551`; migrations through 0009
+
+## Vercel production env (baked in `vercel.json` — no secrets)
+Set on every git/MCP deploy via `vercel.json` `build.env` + `env`:
+- `MEMBERSHIP_CHECKOUT_V2=true`
+- `VITE_MEMBERSHIP_CHECKOUT_V2=true`
+- `MEMBERSHIP_PROVIDER=suby`
+- `SUBY_PRODUCT_ID=pro_j2b6qq84weq359rt3of1fl4p`
+- `SUBY_API_VERSION=v3`
+- `SUBY_PRICE_CENTS=100`
+
+### Mohamad / ops — paste once in Vercel project env (names only; values from Suby dashboard)
+- `SUBY_API_KEY` — merchant API key (`sk_live_…` or `sk_sandbox_…`)
+- `SUBY_WEBHOOK_SECRET` — webhook signing secret (`whsec_…`)
+
+Optional: `DATABASE_URL` (Neon) if not already in project env.
+
+After secrets: redeploy production or wait for next git push; Suby checkout activates when `SUBY_API_KEY` is present.
 
 ## Live / deploy
 - Canonical https://www.adhud.xyz · Vercel Valid · **SEO + v2 live** (title: Open account · $1 membership)
