@@ -1,7 +1,7 @@
 # Wahid · The Adhud — Continuity (Cursor-ready)
 
 **Purpose:** Resume from Cursor or Grok Bot anytime. **No secrets in this file.**  
-**Last updated:** 2026-09-07 ~14:50 Asia/Riyadh (UTC+3)  
+**Last updated:** 2026-09-07 ~15:30 Asia/Riyadh (UTC+3)  
 **Scope lock:** `darweesh128-cmd/wahid-adhud` only — do not touch other projects.
 
 ## Snapshot (NOW)
@@ -10,9 +10,9 @@
 |------|--------|
 | Live site | **https://www.adhud.xyz** HTTP 200 · **English-only** (`lang=en`, Arabic toggle removed, `waahid-lang` purge) |
 | Apex | https://adhud.xyz → 308 → www |
-| Production join | **LIVE** — **Open account · $1** on https://www.adhud.xyz (HTTP 200, verified curl) |
-| SEO | Title/meta/og say **Open account · $1** (no 5 USDT lead) |
-| $1 live preview | **https://temporary-swift-redwood-bejsfjj.vercel.app** HTTP 200 · claim `87ef6955-ecfe-453b-a0fb-56935d640326` |
+| Production join | **LIVE** — **Open account · $1** UI on https://www.adhud.xyz (HTTP 200) |
+| SEO (www) | **STALE** — title still leads with 5 USDT; code on `main` (5287a04) has Open account · $1 meta |
+| SEO (claim deploy) | **READY** — https://temporary-zippy-basin-xicdn8n.vercel.app · title verified · claim `b50b8172-7b37-41b7-a667-b7311fac0b30` |
 | Checkout mode | **Mock/test** until `MEMBERSHIP_PROVIDER=suby` + `SUBY_*` in Vercel env (or Stripe test/mock fallback) |
 | Legacy USDT | **5 USDT TRC-20** collapsible **Or join with USDT** (House `TVmEo3Mn6dJfAWgk8KUF7rEvcdbdegmDER`) |
 | $1 membership | Code merged (PR #7); v2 default ON in code (PR #15); Suby MoR path in PR #20 |
@@ -48,9 +48,10 @@
 >>>>>>> ad779df (feat(suby): align with v3 checkout sessions API (Mohamad-confirmed))
 
 ## Live / deploy
-- Canonical https://www.adhud.xyz · Vercel Valid · **v2 UI live** (asset `index-BMyCKiwL.js`)
-- Deploy: git push `main` → Vercel production; code defaults v2 ON (PR #15)
-- English-only via PR #6
+- Canonical https://www.adhud.xyz · Vercel Valid · **v2 UI live** (asset `index-BMyCKiwL.js`, routes `routes-D4OHzGZB.js` — pre-SEO build)
+- **Blocker fixed:** invalid `$comment` in `vercel.json` (40f89c6) rejected deploys; removed in `f4341fa`
+- Git push `main` → Vercel production **not observed** updating www (2026-09-07); use claim deploy or Vercel dashboard redeploy
+- **Claim deploy (SEO verified):** https://temporary-zippy-basin-xicdn8n.vercel.app · claim https://vercel.com/claim-deployment?code=b50b8172-7b37-41b7-a667-b7311fac0b30 · assign to `wahid-adhud` + `www.adhud.xyz`
 
 ## Join
 - Primary: **$1** Open account + username + Suby card checkout (when `MEMBERSHIP_PROVIDER=suby` + `SUBY_*` configured)
