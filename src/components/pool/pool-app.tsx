@@ -19,6 +19,7 @@ import { inviteRef } from "@/lib/share";
 import { captureRefFromSearch, getStoredRef } from "@/lib/ref";
 import {
   ACCOUNT_USERNAME_STORAGE_KEY,
+  CHECKOUT_SESSION_STORAGE_KEY,
   COUNTRIES,
   COUNTRY_STORAGE_KEY,
   DEFAULT_POOL_ADDRESSES,
@@ -69,7 +70,14 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const checkout = params.get("checkout");
-    const sessionId = params.get("session_id");
+    let sessionId = params.get("session_id");
+    if (!sessionId) {
+      try {
+        sessionId = localStorage.getItem(CHECKOUT_SESSION_STORAGE_KEY);
+      } catch {
+        sessionId = null;
+      }
+    }
     if (checkout === "cancelled") {
       toast.message(t("checkoutCancelled"));
       window.history.replaceState({}, "", `${window.location.pathname}#join`);
@@ -89,6 +97,7 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
           if (result.status === "completed") {
             try {
               localStorage.setItem(ACCOUNT_USERNAME_STORAGE_KEY, result.username);
+              localStorage.removeItem(CHECKOUT_SESSION_STORAGE_KEY);
             } catch {
               /* ignore */
             }

@@ -8,41 +8,33 @@ import {
   resolveSubyProductId,
 } from "@/lib/membership";
 import { fulfillAccountPayment } from "@/lib/membership-fulfill";
+import { resolveSubyApiVersion, resolveSubyPriceCents, subyRequest } from "@/lib/suby-api";
 import { verifySubyWebhookSignature as verifySignature } from "@/lib/suby-webhook-verify";
 
-const DEFAULT_SUBY_API_BASE = "https://api.suby.fi";
-
-type SubyEnvelope<T> = {
-  success: boolean;
-  data?: T;
-  error?: { message?: string; code?: string };
-};
-
-type SubyCreatePaymentData = {
+type SubyV2CreatePaymentData = {
   paymentId: string;
   paymentUrl: string;
 };
 
-type SubyPaymentRecord = {
+type SubyV3CheckoutSession = {
   id: string;
+  url: string;
   status: string;
 };
 
-type SubyWebhookEvent = {
+type SubyWebhookPayload = {
   id: string;
   type: string;
-  createdAt: string;
-  data: {
-    payment: {
-      id: string;
-      status: string;
+  data: Record<string, unknown> & {
+    context?: {
+      externalRef?: string | null;
+      metadata?: Record<string, unknown> | null;
     };
-    context: {
-      externalRef: string | null;
-      metadata: Record<string, unknown> | null;
-      successUrl: string | null;
-      cancelUrl: string | null;
-    };
+    payment?: { id?: string };
+    metadata?: Record<string, unknown> | null;
+    externalRef?: string | null;
+    id?: string;
+    status?: string;
   };
 };
 
@@ -53,14 +45,16 @@ const SUBY_PAID_STATUSES = new Set([
   "PAID",
   "COMPLETED",
   "CHECKOUT_SUCCESS",
+  "AUTHORIZED",
 ]);
 
-const SUBY_FULFILL_EVENTS = new Set(["CHECKOUT_SUCCESS", "PAYMENT_SUCCESS"]);
-
-function subyApiBase(): string {
-  const raw = process.env.SUBY_API_BASE_URL?.trim();
-  return (raw || DEFAULT_SUBY_API_BASE).replace(/\/$/, "");
-}
+/** Card checkout complete — grant membership on these (v3 + v2). */
+const SUBY_FULFILL_EVENTS = new Set([
+  "checkout.succeeded",
+  "CHECKOUT_SUCCESS",
+  "payment.succeeded",
+  "PAYMENT_SUCCESS",
+]);
 
 function subyWebhookSecret(): string | undefined {
   const value = process.env.SUBY_WEBHOOK_SECRET?.trim();
@@ -73,38 +67,6 @@ export function verifySubyWebhookSignature(
   timestampHeader: string | null,
 ): boolean {
   return verifySignature(rawBody, signatureHeader, timestampHeader, subyWebhookSecret());
-}
-
-async function subyRequest<T>(
-  method: "GET" | "POST",
-  path: string,
-  body?: Record<string, unknown>,
-): Promise<{ ok: true; data: T } | { ok: false; error: string }> {
-  const apiKey = resolveSubyApiKey();
-  if (!apiKey) return { ok: false, error: "Suby API key is not configured." };
-
-  const url = `${subyApiBase()}${path}`;
-  const response = await fetch(url, {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      "X-Suby-Api-Key": apiKey,
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-
-  const payload = (await response.json().catch(() => null)) as SubyEnvelope<T> | null;
-  if (!response.ok || !payload?.success || !payload.data) {
-    const message =
-      payload?.error?.message ??
-      (typeof payload === "object" && payload && "message" in payload
-        ? String((payload as { message?: string }).message)
-        : undefined) ??
-      `Suby API error (${response.status})`;
-    return { ok: false, error: message };
-  }
-
-  return { ok: true, data: payload.data };
 }
 
 export function subyCheckoutConfigured(): boolean {
@@ -120,27 +82,60 @@ export type CreateSubyCheckoutInput = {
   origin: string;
 };
 
-export async function createSubyPayment(
+function membershipMetadata(input: CreateSubyCheckoutInput): Record<string, string> {
+  return {
+    payment_id: String(input.paymentId),
+    account_id: String(input.accountId),
+    username: input.username,
+    country: input.country,
+    ref_slug: input.ref ?? "",
+  };
+}
+
+async function createSubyV3CheckoutSession(
   input: CreateSubyCheckoutInput,
+  apiKey: string,
 ): Promise<{ ok: true; url: string; sessionId: string } | { ok: false; error: string }> {
-  if (!isMembershipCheckoutV2Enabled() || checkoutMode() !== "suby") {
-    return { ok: false, error: "Suby checkout is not enabled." };
-  }
   const productId = resolveSubyProductId();
-  if (!productId) {
-    return { ok: false, error: "Suby product id is not configured (SUBY_PRODUCT_ID)." };
+  const body: Record<string, unknown> = {
+    mode: "payment",
+    successUrl: `${input.origin}/?checkout=success`,
+    cancelUrl: `${input.origin}/?checkout=cancelled#join`,
+    metadata: membershipMetadata(input),
+    displayName: `Wahid · ʿAḍīd membership (@${input.username})`,
+  };
+
+  if (productId) {
+    body.productId = productId;
+  } else {
+    body.amount = resolveSubyPriceCents();
+    body.currency = "USD";
   }
 
-  const created = await subyRequest<SubyCreatePaymentData>("POST", "/api/payment/create", {
+  const created = await subyRequest<SubyV3CheckoutSession>(
+    "POST",
+    "/v3/checkout/sessions",
+    apiKey,
+    body,
+  );
+  if (!created.ok) return created;
+
+  return { ok: true, url: created.data.url, sessionId: created.data.id };
+}
+
+async function createSubyV2Payment(
+  input: CreateSubyCheckoutInput,
+  apiKey: string,
+): Promise<{ ok: true; url: string; sessionId: string } | { ok: false; error: string }> {
+  const productId = resolveSubyProductId();
+  if (!productId) {
+    return { ok: false, error: "Suby v2 requires SUBY_PRODUCT_ID (or set SUBY_API_VERSION=v3 for ad-hoc price)." };
+  }
+
+  const created = await subyRequest<SubyV2CreatePaymentData>("POST", "/api/payment/create", apiKey, {
     productId,
     externalRef: String(input.paymentId),
-    metadata: {
-      payment_id: String(input.paymentId),
-      account_id: String(input.accountId),
-      username: input.username,
-      country: input.country,
-      ref_slug: input.ref ?? "",
-    },
+    metadata: membershipMetadata(input),
     successUrl: `${input.origin}/?checkout=success&session_id={PAYMENT_ID}`,
     cancelUrl: `${input.origin}/?checkout=cancelled#join`,
   });
@@ -153,12 +148,42 @@ export async function createSubyPayment(
   return { ok: true, url, sessionId };
 }
 
-function paymentIdFromSubyEvent(event: SubyWebhookEvent): number | null {
-  const fromRef = Number(event.data.context.externalRef ?? 0);
-  if (Number.isFinite(fromRef) && fromRef > 0) return fromRef;
-  const meta = event.data.context.metadata ?? {};
-  const fromMeta = Number(meta.payment_id ?? 0);
-  return Number.isFinite(fromMeta) && fromMeta > 0 ? fromMeta : null;
+export async function createSubyPayment(
+  input: CreateSubyCheckoutInput,
+): Promise<{ ok: true; url: string; sessionId: string } | { ok: false; error: string }> {
+  if (!isMembershipCheckoutV2Enabled() || checkoutMode() !== "suby") {
+    return { ok: false, error: "Suby checkout is not enabled." };
+  }
+
+  const apiKey = resolveSubyApiKey();
+  if (!apiKey) return { ok: false, error: "Suby API key is not configured (SUBY_API_KEY)." };
+
+  return resolveSubyApiVersion() === "v2"
+    ? createSubyV2Payment(input, apiKey)
+    : createSubyV3CheckoutSession(input, apiKey);
+}
+
+export function paymentIdFromSubyWebhook(event: SubyWebhookPayload): number | null {
+  const data = event.data;
+  const metadata =
+    data.metadata ??
+    data.context?.metadata ??
+    (typeof data.payment === "object" && data.payment && "metadata" in data.payment
+      ? (data.payment as { metadata?: Record<string, unknown> }).metadata
+      : null);
+
+  if (metadata && typeof metadata === "object") {
+    const fromMeta = Number(metadata.payment_id ?? 0);
+    if (Number.isFinite(fromMeta) && fromMeta > 0) return fromMeta;
+  }
+
+  const externalRef = data.externalRef ?? data.context?.externalRef;
+  if (externalRef) {
+    const fromRef = Number(externalRef);
+    if (Number.isFinite(fromRef) && fromRef > 0) return fromRef;
+  }
+
+  return null;
 }
 
 function subyPaymentLooksPaid(status: string): boolean {
@@ -177,9 +202,9 @@ export async function handleSubyWebhook(
     return new Response("Invalid signature", { status: 400 });
   }
 
-  let event: SubyWebhookEvent;
+  let event: SubyWebhookPayload;
   try {
-    event = JSON.parse(rawBody) as SubyWebhookEvent;
+    event = JSON.parse(rawBody) as SubyWebhookPayload;
   } catch {
     return new Response("Invalid JSON", { status: 400 });
   }
@@ -192,14 +217,19 @@ export async function handleSubyWebhook(
     });
   }
 
-  const paymentId = paymentIdFromSubyEvent(event);
+  const paymentId = paymentIdFromSubyWebhook(event);
   if (!paymentId) {
-    console.error("[suby] webhook missing payment id:", event.id);
+    console.error("[suby] webhook missing payment id:", event.id, eventType);
     return new Response("Missing payment reference", { status: 400 });
   }
 
+  const externalPaymentId =
+    (typeof event.data.id === "string" ? event.data.id : null) ??
+    event.data.payment?.id ??
+    null;
+
   const result = await fulfillAccountPayment(paymentId, "suby-webhook", {
-    externalPaymentId: event.data.payment.id,
+    externalPaymentId,
   });
   if (!result.ok) {
     console.error("[suby] fulfill failed:", result.error);
@@ -210,6 +240,38 @@ export async function handleSubyWebhook(
     status: 200,
     headers: { "Content-Type": "application/json" },
   });
+}
+
+async function pollSubyV3Session(
+  sessionId: string,
+  apiKey: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const session = await subyRequest<SubyV3CheckoutSession>(
+    "GET",
+    `/v3/checkout/sessions/${sessionId}`,
+    apiKey,
+  );
+  if (!session.ok) return session;
+  if (session.data.status !== "COMPLETED") {
+    return { ok: false, error: "Payment is not completed yet." };
+  }
+  return { ok: true };
+}
+
+async function pollSubyV2Payment(
+  sessionId: string,
+  apiKey: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const payment = await subyRequest<{ id: string; status: string }>(
+    "GET",
+    `/api/payment/${sessionId}`,
+    apiKey,
+  );
+  if (!payment.ok) return payment;
+  if (!subyPaymentLooksPaid(payment.data.status)) {
+    return { ok: false, error: "Payment is not completed yet." };
+  }
+  return { ok: true };
 }
 
 export async function completeSubyCheckoutSession(
@@ -228,11 +290,13 @@ export async function completeSubyCheckoutSession(
   if (!row) return { ok: false, error: "Checkout session not found." };
   if (row.status === "completed" && row.donation_id) return { ok: true };
 
-  const payment = await subyRequest<SubyPaymentRecord>("GET", `/api/payment/${sessionId}`);
-  if (!payment.ok) return payment;
-  if (!subyPaymentLooksPaid(payment.data.status)) {
-    return { ok: false, error: "Payment is not completed yet." };
-  }
+  const apiKey = resolveSubyApiKey();
+  if (!apiKey) return { ok: false, error: "Suby API key is not configured." };
+
+  const polled = sessionId.startsWith("cs_")
+    ? await pollSubyV3Session(sessionId, apiKey)
+    : await pollSubyV2Payment(sessionId, apiKey);
+  if (!polled.ok) return polled;
 
   const result = await fulfillAccountPayment(row.id, stamp, { externalPaymentId: sessionId });
   if (!result.ok) return result;

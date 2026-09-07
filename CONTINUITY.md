@@ -39,9 +39,13 @@
 - **Live payment target:** Suby card → USDC wallet (Suby SAS MoR, FR entity). **No US bank/EIN required.**
 - **Not required for $1 go-live:** Stripe live keys (`sk_live_*`), Lemon Squeezy (PRs closed)
 - `SUBY_API_KEY`, `SUBY_WEBHOOK_SECRET`, `SUBY_PRODUCT_ID` (or `SUBY_PRICE_CENTS`), `SUBY_API_VERSION` (default v3), `SUBY_API_BASE_URL` (default `https://api.beta.suby.fi`) — Suby only; secrets in deploy env
+<<<<<<< HEAD
 - Stripe live (`sk_live_*`) — blocked until `ALLOW_STRIPE_LIVE=true` (legacy dev path only)
 - Stripe test (`sk_test_*`) — used if in Vercel env; else **mock** `/checkout/mock`
 - `DATABASE_URL` — Neon `wahid-adhud` / `little-field-83907551`; migrations through 0009
+=======
+- `DATABASE_URL` — secrets only; Neon `wahid-adhud` / `little-field-83907551`; migrations through 0009
+>>>>>>> ad779df (feat(suby): align with v3 checkout sessions API (Mohamad-confirmed))
 
 ## Live / deploy
 - Canonical https://www.adhud.xyz · Vercel Valid · **v2 UI live** (asset `index-BMyCKiwL.js`)

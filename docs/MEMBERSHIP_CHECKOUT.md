@@ -4,6 +4,9 @@ Wahid product: **$1 USD membership** via username-first account creation, then *
 
 **Live payment target:** [Suby](https://www.suby.fi) — Merchant of Record (FR entity Suby SAS). Customer pays by card (+ APMs); merchant receives **USDC** to wallet. No US bank account or EIN required.
 
+Signup: https://app.suby.fi  
+Docs: https://documentation.suby.fi/llms.txt · https://docs.suby.fi/v3-beta/
+
 **Not required for go-live:** Stripe live keys, Lemon Squeezy (closed — do not merge).
 
 ## Feature flags
@@ -20,10 +23,10 @@ Wahid product: **$1 USD membership** via username-first account creation, then *
 
 | Value | When | Notes |
 |-------|------|--------|
-| `suby` | Live card → USDC | **Production target** — requires Suby dashboard setup |
+| `suby` | Live card → USDC | **Production target** — Mohamad confirmed |
 | `stripe` | Dev / legacy test | Stripe Checkout **test mode** (`sk_test_*`) |
 | `mock` | Local QA | Built-in simulator at `/checkout/mock` |
-| *(unset)* | Auto | Suby if `SUBY_*` configured, else Stripe test, else mock |
+| *(unset)* | Auto | Suby if `SUBY_API_KEY` set, else Stripe test, else mock |
 
 Force mock even with keys: `MEMBERSHIP_CHECKOUT_MOCK=true`
 
@@ -34,7 +37,7 @@ Open account · $1
     → Pick unique username (+ suggest, availability check)
     → Create account & pay $1 (adhud_accounts row first, status=pending)
     → Checkout:
-         • Suby hosted paylink when MEMBERSHIP_PROVIDER=suby
+         • Suby v3 hosted session (cs_…) when MEMBERSHIP_PROVIDER=suby
          • Stripe Checkout TEST when MEMBERSHIP_PROVIDER=stripe
          • Mock simulator at /checkout/mock when mock
     → Payment success (webhook — never trust redirect alone)
@@ -55,10 +58,12 @@ MEMBERSHIP_CHECKOUT_V2=true
 
 ```
 MEMBERSHIP_PROVIDER=suby
-SUBY_API_KEY=sk_live_...              # or sk_sandbox_... for sandbox
-SUBY_PRODUCT_ID=pro_...               # one-time $1 USD product (CARD)
-SUBY_WEBHOOK_SECRET=whsec_...         # dashboard → webhook settings
-SUBY_API_BASE_URL=https://api.suby.fi # optional; default v2 API
+SUBY_API_KEY=                          # sk_live_… or sk_sandbox_…
+SUBY_WEBHOOK_SECRET=                     # whsec_… from dashboard
+SUBY_PRODUCT_ID=                         # pro_… one-time $1 product (optional on v3)
+SUBY_PRICE_CENTS=100                     # optional ad-hoc price if no product (v3 default: 100)
+SUBY_API_VERSION=v3                      # optional; default v3. Set v2 for legacy /api/*
+SUBY_API_BASE_URL=https://api.beta.suby.fi  # optional; v3 default
 BETTER_AUTH_URL=https://www.adhud.xyz
 ```
 
@@ -82,32 +87,41 @@ MEMBERSHIP_PROVIDER=mock
 ```
 MEMBERSHIP_CHECKOUT_MOCK=true
 VITE_PUBLIC_HOSTNAME=www.adhud.xyz
-ALLOW_STRIPE_LIVE=true                 # legacy Stripe live gate only; not needed for Suby
 ```
 
 ## Suby dashboard setup (ops checklist)
 
-Complete these in [Suby dashboard](https://app.suby.fi) before enabling `MEMBERSHIP_PROVIDER=suby` on production:
+Complete in [Suby dashboard](https://app.suby.fi) before enabling `MEMBERSHIP_PROVIDER=suby` on production:
 
 - [ ] Create merchant account (Suby SAS MoR — no US entity required)
 - [ ] **Card Request:** submit proof of business for card acceptance approval
-- [ ] Create **one-time** product: **$1.00 USD**, `paymentMethods: ["CARD"]` (card + APMs)
-- [ ] Configure **USDC wallet payout** (Base or supported chain)
-- [ ] Copy `SUBY_API_KEY` and `SUBY_PRODUCT_ID` into deploy env (never commit)
+- [ ] Create **one-time** product: **$1.00 USD**, card + APMs — copy `SUBY_PRODUCT_ID` (or use ad-hoc `SUBY_PRICE_CENTS` on v3)
+- [ ] Configure **USDC wallet payout**
+- [ ] Copy `SUBY_API_KEY` into deploy env (never commit)
 - [ ] Register webhook URL: `POST https://www.adhud.xyz/api/suby/webhook`
 - [ ] Copy webhook secret → `SUBY_WEBHOOK_SECRET`
-- [ ] Test sandbox (`sk_sandbox_*`) on preview with `MEMBERSHIP_CHECKOUT_V2=true`
-- [ ] Verify `CHECKOUT_SUCCESS` webhook activates membership (not redirect alone)
+- [ ] Sandbox test with `sk_sandbox_…` on preview (`MEMBERSHIP_CHECKOUT_V2=true`)
+- [ ] Verify **`checkout.succeeded`** (v3) or **`CHECKOUT_SUCCESS`** (v2) activates membership — not redirect alone
 
-### API surface (Suby v2)
+### Suby API (Mohamad-confirmed)
 
-| Step | Endpoint |
-|------|----------|
-| Create paylink | `POST /api/payment/create` |
-| Poll status (fallback) | `GET /api/payment/:paymentId` |
-| Webhook events | `CHECKOUT_SUCCESS`, `PAYMENT_SUCCESS` |
+| Integration | Endpoint | Base URL |
+|-------------|----------|----------|
+| **v3 checkout (default)** | `POST /v3/checkout/sessions` | `https://api.beta.suby.fi` |
+| Poll session | `GET /v3/checkout/sessions/{id}` | status `COMPLETED` |
+| Legacy one-time | `POST /api/payment/create` | `https://api.suby.fi` (`SUBY_API_VERSION=v2`) |
 
-Docs: https://documentation.suby.fi/v2/api-reference/introduction
+Auth: header `X-Suby-Api-Key`
+
+### Webhooks — grant membership on
+
+| Event | API | When to fulfill |
+|-------|-----|-----------------|
+| `checkout.succeeded` | v3 | Card hosted checkout complete (**primary**) |
+| `CHECKOUT_SUCCESS` | v2 legacy | Card checkout authorized |
+| `payment.succeeded` | v3 | Accepted (idempotent; also fires after capture) |
+
+Verify: HMAC-SHA256 of ``${timestamp}.${rawBody}`` → `X-Webhook-Signature: v1=…`
 
 ## API surface (Wahid)
 
@@ -117,7 +131,7 @@ Docs: https://documentation.suby.fi/v2/api-reference/introduction
 | `checkAdhudUsername` | Uniqueness check |
 | `createAdhudAccount` | Create account → checkout URL |
 | `payMockCheckout` | Complete mock payment |
-| `POST /api/suby/webhook` | Suby `CHECKOUT_SUCCESS` / `PAYMENT_SUCCESS` |
+| `POST /api/suby/webhook` | Suby signed payment events |
 | `POST /api/stripe/webhook` | Stripe `checkout.session.completed` (dev) |
 | `GET /checkout/mock` | Payment simulator (no keys) |
 
@@ -126,7 +140,7 @@ Docs: https://documentation.suby.fi/v2/api-reference/introduction
 - `migrations/0008_membership_checkout.sql` — `membership_payments`
 - `migrations/0009_adhud_accounts.sql` — `adhud_accounts`, `donations.display_name`, `members.username`
 
-`membership_payments.stripe_session_id` stores the external checkout reference for all providers (Stripe session id, Suby `pay_*` id, or mock id).
+`membership_payments.stripe_session_id` stores the external checkout reference (`cs_…`, `pay_…`, Stripe `cs_…`, or mock id).
 
 ## Test plan
 
@@ -137,12 +151,12 @@ Docs: https://documentation.suby.fi/v2/api-reference/introduction
 3. `/checkout/mock` → **Simulate successful payment**
 4. `@username` on ledger; `/member/{username}` desk
 
-### Suby sandbox
+### Suby sandbox (v3)
 
-1. Suby dashboard → sandbox key + $1 product
-2. Set `MEMBERSHIP_PROVIDER=suby`, `SUBY_API_KEY`, `SUBY_PRODUCT_ID`, `SUBY_WEBHOOK_SECRET`
+1. https://app.suby.fi → sandbox key + optional $1 product
+2. Set `MEMBERSHIP_PROVIDER=suby`, `SUBY_API_KEY`, `SUBY_WEBHOOK_SECRET`, `SUBY_PRODUCT_ID` (or `SUBY_PRICE_CENTS`)
 3. Forward webhooks to preview `/api/suby/webhook`
-4. Complete card checkout → membership activates via webhook
+4. Complete card checkout → membership activates via `checkout.succeeded` webhook
 
 ### Stripe test mode (legacy dev)
 

@@ -212,3 +212,4 @@ export const NETWORK_STORAGE_KEY = "waahid-network";
 export const OWNER_STORAGE_KEY = "waahid-owner";
 export const COUNTRY_STORAGE_KEY = "waahid-country";
 export const ACCOUNT_USERNAME_STORAGE_KEY = "waahid-username";
+export const CHECKOUT_SESSION_STORAGE_KEY = "waahid-checkout-session";

@@ -69,9 +69,11 @@ describe("membership provider resolution", () => {
     );
   });
 
-  it("recognizes Suby payment session ids", () => {
+  it("recognizes Suby checkout session ids", () => {
+    assert.equal(isSubySessionId("cs_abc123"), true);
     assert.equal(isSubySessionId("pay_abc123"), true);
-    assert.equal(isSubySessionId("cs_test_123"), false);
+    assert.equal(isSubySessionId("cs_test_123"), true);
+    assert.equal(isSubySessionId("mock_cs_1"), false);
   });
 });
 
