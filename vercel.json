@@ -1,0 +1,12 @@
+{
+  "build": {
+    "env": {
+      "VITE_MEMBERSHIP_CHECKOUT_V2": "true",
+      "MEMBERSHIP_CHECKOUT_V2": "true"
+    }
+  },
+  "env": {
+    "VITE_MEMBERSHIP_CHECKOUT_V2": "true",
+    "MEMBERSHIP_CHECKOUT_V2": "true"
+  }
+}
