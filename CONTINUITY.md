@@ -1,7 +1,7 @@
 # Wahid · The Adhud — Continuity (Cursor-ready)
 
 **Purpose:** Resume from Cursor or Grok Bot anytime. **No secrets in this file.**  
-**Last updated:** 2026-09-07 ~13:11 Asia/Riyadh (UTC+3)  
+**Last updated:** 2026-09-07 ~13:25 Asia/Riyadh (UTC+3)  
 **Scope lock:** `darweesh128-cmd/wahid-adhud` only — do not touch other projects.
 
 ## Snapshot (NOW)
@@ -12,7 +12,7 @@
 | Apex | https://adhud.xyz → 308 → www |
 | Production join | **5 USDT TRC-20** |
 | $1 membership | Code **merged** (PR #7); feature flag **off** on production; Stripe **test/mock** only until live keys via CEO |
-| $1 preview URL | Redeploy **in progress** (cloud agent) — `MEMBERSHIP_CHECKOUT_V2=true`; mock/test only |
+| $1 preview URL | **https://temporary-instant-sable-34qa9r7.vercel.app** HTTP 200 · mock/test · `MEMBERSHIP_CHECKOUT_V2=true` · claim `dad07aaf-2ee4-4f8e-b4aa-a61c43323764` (may expire) |
 | Brand voice | Interconnection / brotherhood / family mutual solidarity / **trust first** — **never** money-collection or scam framing |
 | Audience | **Global except Arabic countries** · English-first |
 | X posting | Routine enabled for **@adudadid only** |
@@ -25,7 +25,7 @@
 |------|--------|
 | GitHub | https://github.com/darweesh128-cmd/wahid-adhud |
 | Default branch | `main` |
-| Tip (at continuity write) | `e4f13f6` — merge PR #9 (CONTINUITY.md) |
+| Tip (at continuity write) | `7b4886a` — merge PR #10 (CONTINUITY update) |
 | Open PR | **#8** draft — Preview membership v2 https://github.com/darweesh128-cmd/wahid-adhud/pull/8 |
 
 ### Merged PRs
@@ -37,7 +37,8 @@
 - `DATABASE_URL` — secrets only; Neon `wahid-adhud` / `little-field-83907551`; migrations through 0007
 
 ## Live / deploy
-- Canonical https://www.adhud.xyz · Domain adhud.xyz on Vercel Valid
+- Canonical https://www.adhud.xyz · Domain adhud.xyz on Vercel Valid · production join **5 USDT** unchanged
+- $1 preview (mock): https://temporary-instant-sable-34qa9r7.vercel.app · claim `dad07aaf-2ee4-4f8e-b4aa-a61c43323764` (may expire)
 - English-only via PR #6 live
 - Self-heal on non-200 via temporary claim redeploy pattern
 
@@ -53,7 +54,7 @@
 1. X @adudadid: Hotmail unlock **in progress** — hard-fail if passwords fail; bio/post blocked until unlock
 2. TikTok: mid-signup via mail.tm (separate mailbox from Hotmail)
 3. Reddit: account creation attempt **in progress**
-4. $1 preview: redeploy **in progress** (cloud agent); prod stays 5 USDT; keep `MEMBERSHIP_CHECKOUT_V2` off on production
+4. $1 preview: **live** at https://temporary-instant-sable-34qa9r7.vercel.app (mock); prod stays 5 USDT; keep `MEMBERSHIP_CHECKOUT_V2` off on production
 
 ## How to resume in Cursor
 1. Open `darweesh128-cmd/wahid-adhud` on `main`; read this file
