@@ -1,7 +1,7 @@
 # Wahid · The Adhud — Continuity (Cursor-ready)
 
 **Purpose:** Resume from Cursor or Grok Bot anytime. **No secrets in this file.**  
-**Last updated:** 2026-09-07 ~14:50 Asia/Riyadh (UTC+3)  
+**Last updated:** 2026-09-07 ~17:25 UTC  
 **Scope lock:** `darweesh128-cmd/wahid-adhud` only — do not touch other projects.
 
 ## Snapshot (NOW)
@@ -12,10 +12,10 @@
 | Apex | https://adhud.xyz → 308 → www |
 | Production join | **LIVE** — **Open account · $1** on https://www.adhud.xyz (HTTP 200, verified curl) |
 | SEO | Title/meta/og say **Open account · $1** (no 5 USDT lead) |
-| $1 live preview | **https://temporary-swift-redwood-bejsfjj.vercel.app** HTTP 200 · claim `87ef6955-ecfe-453b-a0fb-56935d640326` |
+| $1 backup preview | **https://temporary-rushing-gold-1hh66hx.vercel.app** HTTP 200 · claim `040d70fe-4689-4785-a3f2-544d003c2565` (expires ~60m) |
 | Checkout mode | **Mock/test** until `MEMBERSHIP_PROVIDER=suby` + `SUBY_*` in Vercel env (or Stripe test/mock fallback) |
 | Legacy USDT | **5 USDT TRC-20** collapsible **Or join with USDT** (House `TVmEo3Mn6dJfAWgk8KUF7rEvcdbdegmDER`) |
-| $1 membership | Code merged (PR #7); v2 default ON in code (PR #15); Suby MoR path in PR #20 |
+| $1 membership | PR #7 + #15 v2 default ON; **Suby MoR merged PR #20**; SEO fix PR #17 live on www |
 | Brand voice | Interconnection / brotherhood / family mutual solidarity / **trust first** — **never** money-collection or scam framing |
 | Audience | **Global except Arabic countries** · English-first |
 | X posting | Routine enabled for **@adudadid only** |
@@ -28,10 +28,10 @@
 |------|--------|
 | GitHub | https://github.com/darweesh128-cmd/wahid-adhud |
 | Default branch | `main` |
-| Tip (at continuity write) | `0bf720c` — PR #15 merged; www v2 live |
+| Tip (at continuity write) | `2825621` — SEO redeploy live on www; PR #21 closed (superseded) |
 
 ### Merged PRs
-#15 v2 default ON · #14 preview URL · #13 build env · #12 vercel.json · #7 membership $1 · #6 English-only
+#20 Suby · #17 SEO · #15 v2 default · #14 preview · #13 build env · #12 vercel.json · #7 membership $1 · #6 English-only
 
 ## Feature flags (names only)
 - `MEMBERSHIP_CHECKOUT_V2` / `VITE_MEMBERSHIP_CHECKOUT_V2` — **default ON** in code; env opt-out with `false`
@@ -39,17 +39,13 @@
 - **Live payment target:** Suby card → USDC wallet (Suby SAS MoR, FR entity). **No US bank/EIN required.**
 - **Not required for $1 go-live:** Stripe live keys (`sk_live_*`), Lemon Squeezy (PRs closed)
 - `SUBY_API_KEY`, `SUBY_WEBHOOK_SECRET`, `SUBY_PRODUCT_ID` (or `SUBY_PRICE_CENTS`), `SUBY_API_VERSION` (default v3), `SUBY_API_BASE_URL` (default `https://api.beta.suby.fi`) — Suby only; secrets in deploy env
-<<<<<<< HEAD
 - Stripe live (`sk_live_*`) — blocked until `ALLOW_STRIPE_LIVE=true` (legacy dev path only)
 - Stripe test (`sk_test_*`) — used if in Vercel env; else **mock** `/checkout/mock`
-- `DATABASE_URL` — Neon `wahid-adhud` / `little-field-83907551`; migrations through 0009
-=======
 - `DATABASE_URL` — secrets only; Neon `wahid-adhud` / `little-field-83907551`; migrations through 0009
->>>>>>> ad779df (feat(suby): align with v3 checkout sessions API (Mohamad-confirmed))
 
 ## Live / deploy
-- Canonical https://www.adhud.xyz · Vercel Valid · **v2 UI live** (asset `index-BMyCKiwL.js`)
-- Deploy: git push `main` → Vercel production; code defaults v2 ON (PR #15)
+- Canonical https://www.adhud.xyz · Vercel Valid · **SEO + v2 live** (title: Open account · $1 membership)
+- Deploy: git push `main` → Vercel production; `vercel.json` must stay valid JSON (no `$comment`)
 - English-only via PR #6
 
 ## Join
