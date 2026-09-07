@@ -13,7 +13,7 @@
 | Production join | **LIVE** — **Open account · $1** on https://www.adhud.xyz (HTTP 200, verified curl) |
 | SEO | Title/meta/og say **Open account · $1** (no 5 USDT lead) |
 | $1 backup preview | **https://temporary-rushing-gold-1hh66hx.vercel.app** HTTP 200 · claim `040d70fe-4689-4785-a3f2-544d003c2565` (expires ~60m) |
-| Checkout mode | **Mock/test** until `MEMBERSHIP_PROVIDER=suby` + `SUBY_*` in Vercel env (or Stripe test/mock fallback) |
+| Checkout mode | **Suby target baked** in `vercel.json` (`MEMBERSHIP_PROVIDER=suby`, product/price/v3); live checkout awaits ops vault: `SUBY_API_KEY` + `SUBY_WEBHOOK_SECRET` |
 | Legacy USDT | **5 USDT TRC-20** collapsible **Or join with USDT** (House `TVmEo3Mn6dJfAWgk8KUF7rEvcdbdegmDER`) |
 | $1 membership | PR #7 + #15 v2 default ON; **Suby MoR merged PR #20**; SEO fix PR #17 live on www |
 | Brand voice | Interconnection / brotherhood / family mutual solidarity / **trust first** — **never** money-collection or scam framing |
@@ -61,7 +61,7 @@
 1. X @adudadid: Hotmail unlock in progress
 2. TikTok: mid-signup via mail.tm
 3. Reddit: account creation in progress
-4. Suby live: mock/Stripe test until `SUBY_API_KEY` + `SUBY_WEBHOOK_SECRET` in Vercel + sandbox webhook verified
+4. Suby live: non-secret env baked in `vercel.json`; inject `SUBY_API_KEY` + `SUBY_WEBHOOK_SECRET` in Vercel vault + verify sandbox webhook
 
 ## How to resume in Cursor
 1. Open `darweesh128-cmd/wahid-adhud` on `main`; read this file

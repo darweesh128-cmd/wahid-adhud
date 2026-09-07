@@ -2,11 +2,19 @@
   "build": {
     "env": {
       "VITE_MEMBERSHIP_CHECKOUT_V2": "true",
-      "MEMBERSHIP_CHECKOUT_V2": "true"
+      "MEMBERSHIP_CHECKOUT_V2": "true",
+      "MEMBERSHIP_PROVIDER": "suby",
+      "SUBY_PRODUCT_ID": "pro_j2b6qq84weq359rt3of1fl4p",
+      "SUBY_API_VERSION": "v3",
+      "SUBY_PRICE_CENTS": "100"
     }
   },
   "env": {
     "VITE_MEMBERSHIP_CHECKOUT_V2": "true",
-    "MEMBERSHIP_CHECKOUT_V2": "true"
+    "MEMBERSHIP_CHECKOUT_V2": "true",
+    "MEMBERSHIP_PROVIDER": "suby",
+    "SUBY_PRODUCT_ID": "pro_j2b6qq84weq359rt3of1fl4p",
+    "SUBY_API_VERSION": "v3",
+    "SUBY_PRICE_CENTS": "100"
   }
 }
