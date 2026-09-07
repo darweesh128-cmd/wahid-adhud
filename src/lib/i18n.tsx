@@ -4,8 +4,28 @@ export type Lang = "ar" | "en";
 
 /** Default for fresh visits. Not derived from Accept-Language. */
 export const DEFAULT_LANG: Lang = "en";
-export const LANG_KEY = "waahid-lang";
+/** v2 resets stale `ar` prefs from when Arabic was the production default. */
+export const LANG_KEY = "waahid-lang-v2";
+/** Pre-English-first launch key — cleared on load, never read for preference. */
+export const LEGACY_LANG_KEY = "waahid-lang";
 const LANG_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
+
+function clearLegacyLangPrefs(): void {
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.removeItem(LEGACY_LANG_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
+  if (typeof document !== "undefined") {
+    try {
+      document.cookie = `${LEGACY_LANG_KEY}=;path=/;max-age=0;samesite=lax`;
+    } catch {
+      /* ignore */
+    }
+  }
+}
 
 export function resolveLang(value: string | null | undefined): Lang {
   if (value === "en" || value === "ar") return value;
@@ -18,9 +38,10 @@ function readLangCookie(): string | null {
   return match?.[1] ?? null;
 }
 
-/** Client-only: localStorage, then lang cookie, then DEFAULT_LANG. */
+/** Client-only: v2 localStorage, then v2 lang cookie, then DEFAULT_LANG. */
 export function readSavedLang(): Lang {
   if (typeof window === "undefined") return DEFAULT_LANG;
+  clearLegacyLangPrefs();
   try {
     const saved = localStorage.getItem(LANG_KEY);
     if (saved === "en" || saved === "ar") return saved;
@@ -50,7 +71,7 @@ export function persistLang(lang: Lang): void {
 }
 
 /** Runs in <head> before paint so html lang/dir match the saved preference (default en). */
-export const LANG_BOOTSTRAP_SCRIPT = `(function(){var k="${LANG_KEY}",l="${DEFAULT_LANG}";try{var s=localStorage.getItem(k);if(s==="en"||s==="ar")l=s;else{var m=document.cookie.match(new RegExp("(?:^|; )"+k+"=([^;]*)"));if(m&&(m[1]==="en"||m[1]==="ar"))l=m[1];}}catch(e){}document.documentElement.lang=l;document.documentElement.dir=l==="ar"?"rtl":"ltr";})();`;
+export const LANG_BOOTSTRAP_SCRIPT = `(function(){var k="${LANG_KEY}",old="${LEGACY_LANG_KEY}",l="${DEFAULT_LANG}";try{localStorage.removeItem(old);document.cookie=old+"=;path=/;max-age=0;samesite=lax";var s=localStorage.getItem(k);if(s==="en"||s==="ar")l=s;else{var m=document.cookie.match(new RegExp("(?:^|; )"+k+"=([^;]*)"));if(m&&(m[1]==="en"||m[1]==="ar"))l=m[1];}}catch(e){}document.documentElement.lang=l;document.documentElement.dir=l==="ar"?"rtl":"ltr";})();`;
 
 const strings = {
   ar: {
