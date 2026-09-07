@@ -1,18 +1,19 @@
 # Wahid · The Adhud — Continuity (Cursor-ready)
 
 **Purpose:** Resume from Cursor or Grok Bot anytime. **No secrets in this file.**  
-**Last updated:** 2026-09-07 ~14:45 Asia/Riyadh (UTC+3)  
+**Last updated:** 2026-09-07 ~14:50 Asia/Riyadh (UTC+3)  
 **Scope lock:** `darweesh128-cmd/wahid-adhud` only — do not touch other projects.
 
 ## Snapshot (NOW)
 
 | Area | State |
 |------|--------|
-| Live site | **https://www.adhud.xyz** HTTP 200 · **English-only** (`lang=en`, Arabic toggle removed, `waahid-lang` purge) · **Open account / $1** (`MEMBERSHIP_CHECKOUT_V2` **ON**; mock until Stripe live keys) |
+| Live site | **https://www.adhud.xyz** HTTP 200 **confirmed** · **English-only** (`lang=en`, Arabic toggle removed, `waahid-lang` purge) · **Open account / $1** (`MEMBERSHIP_CHECKOUT_V2` **ON**; mock until Stripe live keys) |
 | Apex | https://adhud.xyz → 308 → www |
-| Production join | **Open account / $1** — `MEMBERSHIP_CHECKOUT_V2` **ON** on production; checkout runs **mock/test** until `sk_live` keys via CEO |
+| Domains | adhud.xyz + www.adhud.xyz on Vercel **Valid** · bound to deployment **temporary-instant-vega-ogx7ypz** |
+| Production join | **$1 username flow** — `MEMBERSHIP_CHECKOUT_V2` **ON**; checkout **mock/test** until `sk_live` keys via CEO |
 | $1 membership | Code **merged** (PR #7); **live on production** with `MEMBERSHIP_CHECKOUT_V2=true`; Stripe **test/mock** only until live keys via CEO |
-| $1 preview URL | **https://temporary-instant-sable-34qa9r7.vercel.app** HTTP 200 · mock/test · `MEMBERSHIP_CHECKOUT_V2=true` · claim `dad07aaf-2ee4-4f8e-b4aa-a61c43323764` (may expire) |
+| Production deployment | **https://temporary-instant-vega-ogx7ypz.vercel.app** · domain-bound to www · `MEMBERSHIP_CHECKOUT_V2=true` · mock until Stripe live keys |
 | Brand voice | Interconnection / brotherhood / family mutual solidarity / **trust first** — **never** money-collection or scam framing |
 | Audience | **Global except Arabic countries** · English-first |
 | X posting | Routine enabled for **@adudadid only** |
@@ -26,7 +27,7 @@
 | GitHub | https://github.com/darweesh128-cmd/wahid-adhud |
 | Default branch | `main` |
 | Tip (at continuity write) | `7b4886a` — merge PR #10 (CONTINUITY update) |
-| Open PR | **#8** draft — Preview membership v2 https://github.com/darweesh128-cmd/wahid-adhud/pull/8 |
+| Open PR | **#16** — CONTINUITY production $1 snapshot https://github.com/darweesh128-cmd/wahid-adhud/pull/16 |
 
 ### Merged PRs
 #9 CONTINUITY.md · #7 membership $1 flag-gated · #6 English-only i18n · #5 Vercel Build Output API · #4 English-first harden · #3 English-first default · #2 viral loops · #1 5 USDT join
@@ -37,13 +38,14 @@
 - `DATABASE_URL` — secrets only; Neon `wahid-adhud` / `little-field-83907551`; migrations through 0007
 
 ## Live / deploy
-- Canonical https://www.adhud.xyz · Domain adhud.xyz on Vercel Valid · **Open account / $1** (`MEMBERSHIP_CHECKOUT_V2` ON; mock until Stripe live keys)
-- $1 preview (mock): https://temporary-instant-sable-34qa9r7.vercel.app · claim `dad07aaf-2ee4-4f8e-b4aa-a61c43323764` (may expire)
+- Canonical **https://www.adhud.xyz** HTTP 200 **confirmed** · Domains **Valid** on Vercel · bound to **temporary-instant-vega-ogx7ypz**
+- Production: **Open account / $1** username flow (`MEMBERSHIP_CHECKOUT_V2` ON; mock until Stripe live keys)
+- Deployment URL: https://temporary-instant-vega-ogx7ypz.vercel.app
 - English-only via PR #6 live
 - Self-heal on non-200 via temporary claim redeploy pattern
 
 ## Join
-- Production: **Open account / $1** — `MEMBERSHIP_CHECKOUT_V2` ON; mock checkout until `sk_live` keys via CEO
+- Production: **$1 username flow** — `MEMBERSHIP_CHECKOUT_V2` ON; mock checkout until `sk_live` keys via CEO
 - Legacy: 5 USDT TRC-20 · House `TVmEo3Mn6dJfAWgk8KUF7rEvcdbdegmDER` (superseded by $1 membership flow)
 - Next: real Stripe charges + membership webhook once `sk_live` keys added; US entity separate
 
@@ -55,18 +57,18 @@
 1. X @adudadid: Hotmail unlock **in progress** — hard-fail if passwords fail; bio/post blocked until unlock
 2. TikTok: mid-signup via mail.tm (separate mailbox from Hotmail)
 3. Reddit: account creation attempt **in progress**
-4. Stripe live keys: production shows **Open account / $1** (mock); real charges blocked until `sk_live` keys via CEO
+4. Stripe live keys: production shows **Open account / $1** username flow (mock); real charges blocked until `sk_live` keys via CEO
 
 ## How to resume in Cursor
 1. Open `darweesh128-cmd/wahid-adhud` on `main`; read this file
-2. Verify www English-only; **Open account / $1** visible (`MEMBERSHIP_CHECKOUT_V2` ON; mock until Stripe live keys)
+2. Verify www HTTP 200 · English-only · **Open account / $1** username flow (`MEMBERSHIP_CHECKOUT_V2` ON; mock until Stripe live keys)
 3. Social: @adudadid only — never @Tarkou78 or Outlook
 4. On Hotmail/X unlock: bio + logo + first solidarity post
 5. Add `sk_live` keys via CEO when ready for real Stripe charges (mock checkout active until then)
 6. No secrets in git/PRs/chat
 
 ### Suggested CloudAgent prompt
-Resume Wahid (wahid-adhud main). Read CONTINUITY.md. Keep www English-only + Open account / $1 (`MEMBERSHIP_CHECKOUT_V2` ON; mock until Stripe live keys); never Tarkou78/Outlook; @adudadid solidarity voice when unlocked; no secrets.
+Resume Wahid (wahid-adhud main). Read CONTINUITY.md. Keep www English-only + $1 username flow (`MEMBERSHIP_CHECKOUT_V2` ON; mock until Stripe live keys); never Tarkou78/Outlook; @adudadid solidarity voice when unlocked; no secrets.
 
 ## Continuity rule
 Update this file on live URL changes, social account switches, flag cutovers, or standing TECH_BLOCKs.
