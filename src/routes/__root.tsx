@@ -3,7 +3,7 @@ import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-r
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/lib/auth/provider";
-import { I18nProvider, LANG_BOOTSTRAP_SCRIPT, useI18n } from "@/lib/i18n";
+import { I18nProvider, LANG_BOOTSTRAP_SCRIPT } from "@/lib/i18n";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import appCss from "../styles.css?url";
 
@@ -79,12 +79,11 @@ function RootDocument() {
 }
 
 function AppToaster() {
-  const { dir } = useI18n();
   return (
     <Toaster
       theme="dark"
       position="top-center"
-      dir={dir}
+      dir="ltr"
       toastOptions={{
         className: "!bg-surface !text-fg !border-border !font-[family-name:var(--font-sans)]",
       }}

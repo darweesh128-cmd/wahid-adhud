@@ -5,7 +5,6 @@ import { OwnerPanel } from "@/components/pool/owner-panel";
 import { ShareTrigger } from "@/components/pool/share-panel";
 import { WALLET_STORAGE_KEY, type PoolSnapshot } from "@/lib/pool";
 import { useI18n } from "@/lib/i18n";
-import { cn } from "@/lib/utils";
 
 export function SiteHeader({
   pool,
@@ -20,7 +19,7 @@ export function SiteHeader({
   onShare: () => void;
   onRevealed: () => void;
 }) {
-  const { t, lang, setLang } = useI18n();
+  const { t } = useI18n();
   const [me, setMe] = useState("");
 
   useEffect(() => {
@@ -48,30 +47,6 @@ export function SiteHeader({
         </Link>
       </div>
       <nav className="flex items-center gap-1 sm:gap-2">
-        <div className="inline-flex h-9 items-center rounded-md border border-border p-0.5">
-          <button
-            type="button"
-            onClick={() => setLang("en")}
-            className={cn(
-              "h-8 min-w-9 rounded px-2 text-[11px]",
-              lang === "en" ? "bg-surface-2 text-fg" : "text-fg-muted hover:text-fg",
-            )}
-            aria-pressed={lang === "en"}
-          >
-            EN
-          </button>
-          <button
-            type="button"
-            onClick={() => setLang("ar")}
-            className={cn(
-              "h-8 min-w-9 rounded px-2 text-[11px]",
-              lang === "ar" ? "bg-surface-2 text-fg" : "text-fg-muted hover:text-fg",
-            )}
-            aria-pressed={lang === "ar"}
-          >
-            عربي
-          </button>
-        </div>
         <Link
           to="/network"
           className="inline-flex h-9 items-center rounded-md px-2 text-xs text-fg-muted hover:text-fg"
