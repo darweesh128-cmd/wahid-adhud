@@ -4,6 +4,8 @@ Wallet-level mutual aid. No account. No KYC. Five USDT on TRC-20.
 
 You may be fine today. Someone else is not.
 
+**Cursor / Cloud Agent:** See [CONTINUITY.md](./CONTINUITY.md) for session resume context (no secrets).
+
 ## The example
 
 The House page shows **the total** and **the gifts moving**.
