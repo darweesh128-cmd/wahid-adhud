@@ -25,9 +25,25 @@ export function isMembershipCheckoutV2Enabled(): boolean {
   return raw === "true";
 }
 
-/** Stripe secret present — use hosted Checkout (test or live keys from Mohamad later). */
+/**
+ * Stripe secret for checkout. **Test mode only** until the US entity can receive payouts.
+ *
+ * Proposed entity: Ashrim LLC (Wyoming) — not filed yet; no EIN or company bank.
+ * `sk_live_*` keys are ignored unless `ALLOW_STRIPE_LIVE=true` (do not enable until
+ * entity + EIN + company bank exist). Prefer Stripe over Lemon Squeezy for now.
+ */
+export function resolveStripeSecretKey(): string | undefined {
+  const value = process.env.STRIPE_SECRET_KEY?.trim();
+  if (!value) return undefined;
+  if (value.startsWith("sk_live_") && !envTruthy("ALLOW_STRIPE_LIVE")) {
+    return undefined;
+  }
+  return value;
+}
+
+/** True when a usable Stripe **test** secret is configured. */
 export function hasStripeSecret(): boolean {
-  return Boolean(process.env.STRIPE_SECRET_KEY?.trim());
+  return Boolean(resolveStripeSecretKey());
 }
 
 /**

@@ -9,6 +9,7 @@ import {
   isMockSessionId,
   mockSessionId,
   paymentIdFromMockSession,
+  resolveStripeSecretKey,
 } from "@/lib/membership";
 import { activateAccountMembership, cardCheckoutAmountUsdt } from "@/lib/membership-activate";
 import { isCountry } from "@/lib/pool";
@@ -27,8 +28,7 @@ type PaymentRow = {
 };
 
 function stripeSecretKey(): string | undefined {
-  const value = process.env.STRIPE_SECRET_KEY?.trim();
-  return value || undefined;
+  return resolveStripeSecretKey();
 }
 
 function stripeWebhookSecret(): string | undefined {
