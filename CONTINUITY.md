@@ -11,6 +11,7 @@
 | Live site | **https://www.adhud.xyz** HTTP 200 · **English-only** (`lang=en`, Arabic toggle removed, `waahid-lang` purge) |
 | Apex | https://adhud.xyz → 308 → www |
 | Production join | **LIVE** — **Open account · $1** on https://www.adhud.xyz (HTTP 200, verified curl) |
+| SEO | Title/meta/og say **Open account · $1** (no 5 USDT lead) |
 | $1 live preview | **https://temporary-swift-redwood-bejsfjj.vercel.app** HTTP 200 · claim `87ef6955-ecfe-453b-a0fb-56935d640326` |
 | Checkout mode | **Mock/test** unless live `sk_live` + `ALLOW_STRIPE_LIVE=true` in Vercel env |
 | Legacy USDT | **5 USDT TRC-20** collapsible **Or join with USDT** (House `TVmEo3Mn6dJfAWgk8KUF7rEvcdbdegmDER`) |
