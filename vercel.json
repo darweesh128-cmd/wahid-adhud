@@ -1,5 +1,4 @@
 {
-  "$comment": "Redeploy trigger 2026-09-07 — SEO meta PR #17 (5287a04)",
   "build": {
     "env": {
       "VITE_MEMBERSHIP_CHECKOUT_V2": "true",
