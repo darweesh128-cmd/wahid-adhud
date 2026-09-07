@@ -14,6 +14,9 @@ import { Route as NetworkRouteImport } from './routes/network'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AdhudWalletRouteImport } from './routes/adhud.$wallet'
+import { Route as CheckoutMockRouteImport } from './routes/checkout.mock'
+import { Route as MemberUsernameRouteImport } from './routes/member.$username'
+import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,6 +43,21 @@ const AdhudWalletRoute = AdhudWalletRouteImport.update({
   path: '/adhud/$wallet',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CheckoutMockRoute = CheckoutMockRouteImport.update({
+  id: '/checkout/mock',
+  path: '/checkout/mock',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MemberUsernameRoute = MemberUsernameRouteImport.update({
+  id: '/member/$username',
+  path: '/member/$username',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
+  id: '/api/stripe/webhook',
+  path: '/api/stripe/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +65,9 @@ export interface FileRoutesByFullPath {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/adhud/$wallet': typeof AdhudWalletRoute
+  '/checkout/mock': typeof CheckoutMockRoute
+  '/member/$username': typeof MemberUsernameRoute
+  '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +75,9 @@ export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/adhud/$wallet': typeof AdhudWalletRoute
+  '/checkout/mock': typeof CheckoutMockRoute
+  '/member/$username': typeof MemberUsernameRoute
+  '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +86,31 @@ export interface FileRoutesById {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/adhud/$wallet': typeof AdhudWalletRoute
+  '/checkout/mock': typeof CheckoutMockRoute
+  '/member/$username': typeof MemberUsernameRoute
+  '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/network' | '/robots.txt' | '/sitemap.xml' | '/adhud/$wallet'
+    | '/'
+    | '/network'
+    | '/robots.txt'
+    | '/sitemap.xml'
+    | '/adhud/$wallet'
+    | '/checkout/mock'
+    | '/member/$username'
+    | '/api/stripe/webhook'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/network' | '/robots.txt' | '/sitemap.xml' | '/adhud/$wallet'
+  to:
+    | '/'
+    | '/network'
+    | '/robots.txt'
+    | '/sitemap.xml'
+    | '/adhud/$wallet'
+    | '/checkout/mock'
+    | '/member/$username'
+    | '/api/stripe/webhook'
   id:
     | '__root__'
     | '/'
@@ -76,6 +118,9 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/adhud/$wallet'
+    | '/checkout/mock'
+    | '/member/$username'
+    | '/api/stripe/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -84,6 +129,9 @@ export interface RootRouteChildren {
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AdhudWalletRoute: typeof AdhudWalletRoute
+  CheckoutMockRoute: typeof CheckoutMockRoute
+  MemberUsernameRoute: typeof MemberUsernameRoute
+  ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -123,6 +171,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdhudWalletRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/checkout/mock': {
+      id: '/checkout/mock'
+      path: '/checkout/mock'
+      fullPath: '/checkout/mock'
+      preLoaderRoute: typeof CheckoutMockRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/member/$username': {
+      id: '/member/$username'
+      path: '/member/$username'
+      fullPath: '/member/$username'
+      preLoaderRoute: typeof MemberUsernameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/stripe/webhook': {
+      id: '/api/stripe/webhook'
+      path: '/api/stripe/webhook'
+      fullPath: '/api/stripe/webhook'
+      preLoaderRoute: typeof ApiStripeWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -132,6 +201,9 @@ const rootRouteChildren: RootRouteChildren = {
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   AdhudWalletRoute: AdhudWalletRoute,
+  CheckoutMockRoute: CheckoutMockRoute,
+  MemberUsernameRoute: MemberUsernameRoute,
+  ApiStripeWebhookRoute: ApiStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
