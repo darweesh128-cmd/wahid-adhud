@@ -7,7 +7,7 @@ const DEFAULT_V2_BASE = "https://api.suby.fi";
 
 export function resolveSubyApiVersion(): SubyApiVersion {
   const raw = process.env.SUBY_API_VERSION?.trim().toLowerCase();
-  return raw === "v2" ? "v2" : "v3";
+  return raw === "v3" ? "v3" : "v2";
 }
 
 export function subyApiBase(): string {
