@@ -9,6 +9,8 @@ Docs: https://documentation.suby.fi/llms.txt · https://docs.suby.fi/v3-beta/
 
 **Not required for go-live:** Stripe live keys, Lemon Squeezy (closed — do not merge).
 
+**Production (2026-09-07):** www.adhud.xyz live on Vercel project `temporary-prompt-savanna-pzvu0qr` (Domains Valid). Suby v2 checkout smoke-verified → checkout.suby.fi. Use `SUBY_API_VERSION=v2` — v3 beta rejects the live vault key. Secrets (`SUBY_API_KEY`, `SUBY_WEBHOOK_SECRET`) in Vercel vault only.
+
 ## Feature flags
 
 | Variable | Where | Effect |
@@ -91,17 +93,17 @@ VITE_PUBLIC_HOSTNAME=www.adhud.xyz
 
 ## Suby dashboard setup (ops checklist)
 
-Complete in [Suby dashboard](https://app.suby.fi) before enabling `MEMBERSHIP_PROVIDER=suby` on production:
+Complete in [Suby dashboard](https://app.suby.fi) — **production live as of 2026-09-07**:
 
-- [ ] Create merchant account (Suby SAS MoR — no US entity required)
-- [ ] **Card Request:** submit proof of business for card acceptance approval
-- [ ] Create **one-time** product: **$1.00 USD**, card + APMs — copy `SUBY_PRODUCT_ID` (or use ad-hoc `SUBY_PRICE_CENTS` on v3)
-- [ ] Configure **USDC wallet payout**
-- [ ] Copy `SUBY_API_KEY` into deploy env (never commit)
-- [ ] Register webhook URL: `POST https://www.adhud.xyz/api/suby/webhook`
-- [ ] Copy webhook secret → `SUBY_WEBHOOK_SECRET`
-- [ ] Sandbox test with `sk_sandbox_…` on preview (`MEMBERSHIP_CHECKOUT_V2=true`)
-- [ ] Verify **`checkout.succeeded`** (v3) or **`CHECKOUT_SUCCESS`** (v2) activates membership — not redirect alone
+- [x] Create merchant account (Suby SAS MoR — no US entity required)
+- [x] **Card Request:** submit proof of business for card acceptance approval
+- [x] Create **one-time** product: **$1.00 USD** — `SUBY_PRODUCT_ID=pro_j2b6qq84weq359rt3of1fl4p`
+- [x] Configure **USDC wallet payout**
+- [x] `SUBY_API_KEY` in Vercel vault (never commit)
+- [x] Webhook URL: `POST https://www.adhud.xyz/api/suby/webhook`
+- [x] `SUBY_WEBHOOK_SECRET` in Vercel vault
+- [x] Production smoke: Open account → checkout.suby.fi (stopped before card)
+- [ ] End-to-end card payment + **`CHECKOUT_SUCCESS`** (v2) webhook fulfillment
 
 ### Suby API (Mohamad-confirmed)
 
