@@ -17,6 +17,7 @@ import { Route as AdhudWalletRouteImport } from './routes/adhud.$wallet'
 import { Route as CheckoutMockRouteImport } from './routes/checkout.mock'
 import { Route as MemberUsernameRouteImport } from './routes/member.$username'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
+import { Route as ApiSubyWebhookRouteImport } from './routes/api/suby/webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,6 +59,11 @@ const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
   path: '/api/stripe/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSubyWebhookRoute = ApiSubyWebhookRouteImport.update({
+  id: '/api/suby/webhook',
+  path: '/api/suby/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/checkout/mock': typeof CheckoutMockRoute
   '/member/$username': typeof MemberUsernameRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
+  '/api/suby/webhook': typeof ApiSubyWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByTo {
   '/checkout/mock': typeof CheckoutMockRoute
   '/member/$username': typeof MemberUsernameRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
+  '/api/suby/webhook': typeof ApiSubyWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +97,7 @@ export interface FileRoutesById {
   '/checkout/mock': typeof CheckoutMockRoute
   '/member/$username': typeof MemberUsernameRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
+  '/api/suby/webhook': typeof ApiSubyWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
     | '/checkout/mock'
     | '/member/$username'
     | '/api/stripe/webhook'
+    | '/api/suby/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/checkout/mock'
     | '/member/$username'
     | '/api/stripe/webhook'
+    | '/api/suby/webhook'
   id:
     | '__root__'
     | '/'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '/checkout/mock'
     | '/member/$username'
     | '/api/stripe/webhook'
+    | '/api/suby/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -132,6 +144,7 @@ export interface RootRouteChildren {
   CheckoutMockRoute: typeof CheckoutMockRoute
   MemberUsernameRoute: typeof MemberUsernameRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
+  ApiSubyWebhookRoute: typeof ApiSubyWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -192,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiStripeWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/suby/webhook': {
+      id: '/api/suby/webhook'
+      path: '/api/suby/webhook'
+      fullPath: '/api/suby/webhook'
+      preLoaderRoute: typeof ApiSubyWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -204,6 +224,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutMockRoute: CheckoutMockRoute,
   MemberUsernameRoute: MemberUsernameRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
+  ApiSubyWebhookRoute: ApiSubyWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,31 +1,27 @@
 import Stripe from "stripe";
 import { getSql } from "@/lib/db";
 import {
-  MEMBERSHIP_USD_CENTS,
+  checkoutAvailable,
   checkoutMode,
   hasStripeSecret,
   isMembershipCheckoutV2Enabled,
   isMockCheckoutEnabled,
   isMockSessionId,
+  isSubySessionId,
   mockSessionId,
   paymentIdFromMockSession,
   resolveStripeSecretKey,
 } from "@/lib/membership";
-import { activateAccountMembership, cardCheckoutAmountUsdt } from "@/lib/membership-activate";
+import {
+  appOrigin,
+  fulfillAccountPayment,
+  insertPendingMembershipPayment,
+  loadMembershipPaymentById,
+  loadMembershipPaymentBySession,
+  setMembershipPaymentSessionId,
+} from "@/lib/membership-fulfill";
 import { isCountry } from "@/lib/pool";
-import { loadSnapshot } from "@/lib/pool-snapshot";
-
-type PaymentRow = {
-  id: number;
-  stripe_session_id: string | null;
-  payout_wallet: string | null;
-  country: string;
-  status: string;
-  donation_id: number | null;
-  account_id: number | null;
-  username: string | null;
-  ref_slug: string | null;
-};
+import { completeSubyCheckoutSession, createSubyPayment } from "@/lib/suby-checkout";
 
 function stripeSecretKey(): string | undefined {
   return resolveStripeSecretKey();
@@ -47,22 +43,10 @@ export function getStripeClient(): Stripe | null {
   return new Stripe(key, { apiVersion: "2025-02-24.acacia" });
 }
 
+export { checkoutAvailable };
+
 export function stripeCheckoutConfigured(): boolean {
   return hasStripeSecret();
-}
-
-export function checkoutAvailable(): boolean {
-  const mode = checkoutMode();
-  return mode === "stripe" || mode === "mock";
-}
-
-function appOrigin(requestOrigin?: string): string {
-  const fromEnv = process.env.BETTER_AUTH_URL?.trim() || process.env.VITE_PUBLIC_HOSTNAME?.trim();
-  if (fromEnv) {
-    return fromEnv.startsWith("http") ? fromEnv.replace(/\/$/, "") : `https://${fromEnv}`;
-  }
-  if (requestOrigin) return requestOrigin.replace(/\/$/, "");
-  return "http://localhost:8080";
 }
 
 export type CreateAccountCheckoutInput = {
@@ -76,29 +60,8 @@ export type CreateAccountCheckoutInput = {
 };
 
 export type CreateCheckoutResult =
-  | { ok: true; url: string; sessionId: string; mode: "stripe" | "mock" }
+  | { ok: true; url: string; sessionId: string; mode: "suby" | "stripe" | "mock" }
   | { ok: false; error: string };
-
-async function insertPendingPayment(input: CreateAccountCheckoutInput): Promise<number | null> {
-  const sql = await getSql();
-  const pending = await sql<{ id: number }>`
-    insert into membership_payments (
-      account_id, username, country, amount_cents, currency, status, ref_slug, client_stamp
-    )
-    values (
-      ${input.accountId},
-      ${input.username},
-      ${input.country},
-      ${MEMBERSHIP_USD_CENTS},
-      'usd',
-      'pending',
-      ${input.ref},
-      ${input.stamp}
-    )
-    returning id
-  `;
-  return pending[0]?.id ?? null;
-}
 
 export async function createMembershipCheckoutForAccount(
   input: CreateAccountCheckoutInput,
@@ -126,7 +89,13 @@ export async function createMembershipCheckoutForAccount(
     return { ok: false, error: "This account is already active." };
   }
 
-  const paymentId = await insertPendingPayment(input);
+  const paymentId = await insertPendingMembershipPayment({
+    accountId: input.accountId,
+    username: input.username,
+    country: input.country,
+    ref: input.ref,
+    stamp: input.stamp,
+  });
   if (!paymentId) return { ok: false, error: "Could not start checkout." };
 
   const origin = appOrigin(input.origin);
@@ -134,13 +103,23 @@ export async function createMembershipCheckoutForAccount(
 
   if (mode === "mock") {
     const sessionId = mockSessionId(paymentId);
-    await sql`
-      update membership_payments
-      set stripe_session_id = ${sessionId}
-      where id = ${paymentId}
-    `;
+    await setMembershipPaymentSessionId(paymentId, sessionId);
     const url = `${origin}/checkout/mock?pid=${paymentId}&token=${encodeURIComponent(input.setupToken)}`;
     return { ok: true, url, sessionId, mode: "mock" };
+  }
+
+  if (mode === "suby") {
+    const suby = await createSubyPayment({
+      paymentId,
+      accountId: input.accountId,
+      username: input.username,
+      country: input.country,
+      ref: input.ref,
+      origin,
+    });
+    if (!suby.ok) return suby;
+    await setMembershipPaymentSessionId(paymentId, suby.sessionId);
+    return { ok: true, url: suby.url, sessionId: suby.sessionId, mode: "suby" };
   }
 
   const stripe = getStripeClient();
@@ -155,7 +134,7 @@ export async function createMembershipCheckoutForAccount(
         {
           price_data: {
             currency: "usd",
-            unit_amount: MEMBERSHIP_USD_CENTS,
+            unit_amount: 100,
             product_data: {
               name: "Wahid · ʿAḍīd membership",
               description: `One dollar to join The ʿAḍud as @${input.username}.`,
@@ -185,64 +164,8 @@ export async function createMembershipCheckoutForAccount(
     return { ok: false, error: "Stripe did not return a checkout URL." };
   }
 
-  await sql`
-    update membership_payments
-    set stripe_session_id = ${session.id}
-    where id = ${paymentId}
-  `;
-
+  await setMembershipPaymentSessionId(paymentId, session.id);
   return { ok: true, url: session.url, sessionId: session.id, mode: "stripe" };
-}
-
-export async function fulfillAccountPayment(
-  paymentId: number,
-  stamp: string,
-): Promise<{ ok: true; username: string; donationId?: number } | { ok: false; error: string }> {
-  const sql = await getSql();
-  const existing = await sql<PaymentRow>`
-    select id, stripe_session_id, payout_wallet, country, status, donation_id, account_id, username, ref_slug
-    from membership_payments
-    where id = ${paymentId}
-    limit 1
-    for update
-  `;
-  const payment = existing[0];
-  if (!payment) return { ok: false, error: "Payment not found." };
-  if (payment.status === "completed" && payment.donation_id) {
-    return { ok: true, username: payment.username ?? "" };
-  }
-
-  const accountId = Number(payment.account_id ?? 0);
-  const username = (payment.username ?? "").trim();
-  if (!accountId || !username) {
-    return { ok: false, error: "Payment is missing account metadata." };
-  }
-
-  const ref = payment.ref_slug;
-  const activation = await activateAccountMembership(
-    {
-      accountId,
-      username,
-      country: payment.country,
-      ref,
-      stamp,
-      amountUsdt: cardCheckoutAmountUsdt,
-    },
-    loadSnapshot,
-  );
-  if (!activation.ok) return activation;
-
-  await sql`
-    update membership_payments
-    set
-      status = 'completed',
-      donation_id = ${activation.donationId ?? null},
-      stripe_payment_intent_id = ${isMockCheckoutEnabled() ? `mock_pi_${paymentId}` : null},
-      completed_at = now()
-    where id = ${payment.id}
-  `;
-
-  return { ok: true, username, donationId: activation.donationId };
 }
 
 export async function completeMockCheckout(
@@ -280,11 +203,7 @@ export async function completeCheckoutSession(sessionId: string, stamp: string):
   if (isMockSessionId(sessionId)) {
     const paymentId = paymentIdFromMockSession(sessionId);
     if (!paymentId) return { ok: false, status: "missing", error: "Invalid mock session." };
-    const sql = await getSql();
-    const rows = await sql<PaymentRow>`
-      select id, status, donation_id, username from membership_payments where id = ${paymentId} limit 1
-    `;
-    const row = rows[0];
+    const row = await loadMembershipPaymentById(paymentId);
     if (!row) return { ok: false, status: "missing", error: "Checkout session not found." };
     if (row.status === "completed" && row.donation_id) {
       return { ok: true, status: "completed", username: row.username ?? undefined };
@@ -292,17 +211,26 @@ export async function completeCheckoutSession(sessionId: string, stamp: string):
     return { ok: false, status: "pending", username: row.username ?? undefined };
   }
 
-  const sql = await getSql();
-  const rows = await sql<PaymentRow>`
-    select id, stripe_session_id, payout_wallet, country, status, donation_id, account_id, username
-    from membership_payments
-    where stripe_session_id = ${sessionId}
-    limit 1
-  `;
-  const row = rows[0];
+  const row = await loadMembershipPaymentBySession(sessionId);
   if (!row) return { ok: false, status: "missing", error: "Checkout session not found." };
   if (row.status === "completed" && row.donation_id) {
     return { ok: true, status: "completed", username: row.username ?? undefined };
+  }
+
+  if (isSubySessionId(sessionId)) {
+    const suby = await completeSubyCheckoutSession(sessionId, stamp);
+    if (!suby.ok) {
+      if (suby.error === "Payment is not completed yet.") {
+        return { ok: false, status: "pending", username: row.username ?? undefined };
+      }
+      return { ok: false, status: "failed", error: suby.error };
+    }
+    const refreshed = await loadMembershipPaymentBySession(sessionId);
+    return {
+      ok: true,
+      status: "completed",
+      username: refreshed?.username ?? row.username ?? undefined,
+    };
   }
 
   const stripe = getStripeClient();
@@ -362,18 +290,10 @@ async function fulfillPaidCheckoutSession(
   const paymentId = Number(session.metadata?.payment_id ?? session.client_reference_id ?? 0);
   if (!paymentId) return { ok: false, error: "Missing payment id in session." };
 
-  const result = await fulfillAccountPayment(paymentId, stamp);
-  if (!result.ok) return result;
-
   const paymentIntentId =
     typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null;
 
-  if (paymentIntentId) {
-    const sql = await getSql();
-    await sql`
-      update membership_payments set stripe_payment_intent_id = ${paymentIntentId} where id = ${paymentId}
-    `;
-  }
-
+  const result = await fulfillAccountPayment(paymentId, stamp, { externalPaymentId: paymentIntentId });
+  if (!result.ok) return result;
   return { ok: true };
 }
