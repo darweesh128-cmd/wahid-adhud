@@ -12,10 +12,13 @@ import { AppShell } from "@/components/pool/app-shell";
 import { NetworkMap } from "@/components/pool/network-map";
 import { ShareOverlay } from "@/components/pool/share-panel";
 import { WalletQr } from "@/components/pool/wallet-qr";
-import { contribute, getNetwork, getPool } from "@/lib/pool-api";
+import { ActiveAccountBanner, JoinAccountPanel } from "@/components/pool/join-account-panel";
+import { contribute, getMembershipCheckoutStatus, getNetwork, getPool } from "@/lib/pool-api";
+import { membershipCheckoutV2 } from "@/lib/membership";
 import { inviteRef } from "@/lib/share";
 import { captureRefFromSearch, getStoredRef } from "@/lib/ref";
 import {
+  ACCOUNT_USERNAME_STORAGE_KEY,
   COUNTRIES,
   COUNTRY_STORAGE_KEY,
   DEFAULT_POOL_ADDRESSES,
@@ -31,7 +34,7 @@ import {
   type NetworkSnapshot,
   type PoolSnapshot,
 } from "@/lib/pool";
-import { HINT_KEYS, countryLabel, useI18n } from "@/lib/i18n";
+import { HINT_KEYS, countryLabel, useI18n, type CopyKey } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSnapshot; network: NetworkSnapshot }) {
@@ -44,20 +47,69 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
   const [now, setNow] = useState(() => Date.now());
   const [shareOpen, setShareOpen] = useState(false);
   const [justJoined, setJustJoined] = useState(false);
+  const [showUsdtJoin, setShowUsdtJoin] = useState(false);
+  const [accountUsername, setAccountUsername] = useState("");
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem(WALLET_STORAGE_KEY);
       const savedNet = localStorage.getItem(NETWORK_STORAGE_KEY);
       const savedCountry = localStorage.getItem(COUNTRY_STORAGE_KEY);
+      const savedUsername = localStorage.getItem(ACCOUNT_USERNAME_STORAGE_KEY);
       if (saved) setWallet(saved);
       if (savedNet === "trc20" || savedNet === "erc20") setNetwork(savedNet);
       if (savedCountry && isCountry(savedCountry)) setCountry(savedCountry);
+      if (savedUsername) setAccountUsername(savedUsername);
     } catch {
       /* ignore */
     }
     captureRefFromSearch(window.location.search);
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const checkout = params.get("checkout");
+    const sessionId = params.get("session_id");
+    if (checkout === "cancelled") {
+      toast.message(t("checkoutCancelled"));
+      window.history.replaceState({}, "", `${window.location.pathname}#join`);
+      return;
+    }
+    if (checkout !== "success" || !sessionId) return;
+
+    void (async () => {
+      const pendingToast = toast.loading(t("checkoutPending"));
+      try {
+        for (let attempt = 0; attempt < 12; attempt += 1) {
+          const result = await getMembershipCheckoutStatus({ data: { sessionId } });
+          if (!result.ok) {
+            toast.error(result.error, { id: pendingToast });
+            return;
+          }
+          if (result.status === "completed") {
+            try {
+              localStorage.setItem(ACCOUNT_USERNAME_STORAGE_KEY, result.username);
+            } catch {
+              /* ignore */
+            }
+            setAccountUsername(result.username);
+            queryClient.setQueryData(["pool", undefined], result.snapshot);
+            void queryClient.invalidateQueries({ queryKey: ["pool"] });
+            void queryClient.invalidateQueries({ queryKey: ["network"] });
+            toast.success(t("toastJoined"), { id: pendingToast });
+            setJustJoined(true);
+            setShareOpen(true);
+            window.history.replaceState({}, "", `${window.location.pathname}#join`);
+            return;
+          }
+          await new Promise((resolve) => window.setTimeout(resolve, 1500));
+        }
+        toast.message(t("checkoutPending"), { id: pendingToast });
+      } catch {
+        toast.error(t("checkoutFail"), { id: pendingToast });
+      }
+    })();
+  }, [queryClient, t]);
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 30_000);
@@ -159,7 +211,7 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
           <p className="mt-6 max-w-xl text-sm leading-relaxed text-fg-muted sm:text-base">{t("storyP2")}</p>
           <div className="mt-8 flex flex-wrap gap-2">
             <Button size="lg" onClick={scrollToJoin}>
-              {t("joinCta")}
+              {membershipCheckoutV2 ? t("createAccountCta") : t("joinCta")}
             </Button>
             <Button size="lg" variant="secondary" onClick={() => setShareOpen(true)}>
               {t("sendThree")}
@@ -171,110 +223,117 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
         </section>
 
         <section className="mt-12 grid gap-5 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-          <article className="rounded-xl border border-border bg-surface p-5 sm:p-6">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <ScanLine className="size-4 text-accent" />
-                <h2 className="text-sm font-medium">{t("houseWallet")}</h2>
+          {membershipCheckoutV2 && showUsdtJoin ? (
+            <article className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <ScanLine className="size-4 text-accent" />
+                  <h2 className="text-sm font-medium">{t("houseWallet")}</h2>
+                </div>
+                <Badge variant="outline">TRC-20 · 5 USDT</Badge>
               </div>
-              <Badge variant="outline">TRC-20 · 5 USDT</Badge>
-            </div>
-
-            <div className="mt-5 space-y-3">
-              <p className="text-xs font-medium text-accent">{t("joinFlowTitle")}</p>
-              <JoinFlowStep n="1" title={t("joinFlow1t")}>{t("joinFlow1")}</JoinFlowStep>
-              <JoinFlowStep n="2" title={t("joinFlow2t")}>{t("joinFlow2")}</JoinFlowStep>
-              <JoinFlowStep n="3" title={t("joinFlow3t")}>{t("joinFlow3")}</JoinFlowStep>
-            </div>
-
-            <div className="mt-4 space-y-2 rounded-md border border-danger/30 bg-danger/5 px-3 py-2.5 text-xs leading-relaxed text-fg-muted">
-              <p>{t("joinWarnNetwork")}</p>
-              <p>{t("joinWarnAmount")}</p>
-            </div>
-
-            <div className="mt-5 grid grid-cols-2 gap-1 rounded-lg bg-surface-2 p-1">
-              <NetworkTab active={network === "trc20"} onClick={() => setNetwork("trc20")} recommended>
-                TRC-20
-              </NetworkTab>
-              <NetworkTab active={network === "erc20"} onClick={() => setNetwork("erc20")} advanced>
-                ERC-20
-              </NetworkTab>
-            </div>
-            <div className="mx-auto mt-4 aspect-square w-full max-w-[220px] rounded-lg bg-paper p-3">
-              <WalletQr value={address} />
-            </div>
-            <p className="mt-3 text-center text-xs text-fg-subtle">{t("scanHint")}</p>
-            <div className="mt-4 rounded-md border border-border bg-surface-2 p-3">
-              <p className="text-[11px] text-fg-subtle">{t("address")}</p>
-              <div className="mt-1.5 flex items-center gap-2">
-                <p className="min-w-0 flex-1 break-all text-left font-mono text-[12px] leading-relaxed text-fg" dir="ltr">
-                  {address}
-                </p>
-                <CopyButton value={address} />
+              <UsdtJoinInstructions
+                address={address}
+                contract={contract}
+                network={network}
+                setNetwork={setNetwork}
+                t={t}
+              />
+            </article>
+          ) : membershipCheckoutV2 ? (
+            <article className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+              <p className="text-xs font-medium text-accent">{t("accountFlowKicker")}</p>
+              <h2 className="mt-2 text-lg font-medium">{t("accountFlowTitle")}</h2>
+              <ol className="mt-4 space-y-3 text-sm text-fg-muted">
+                <li>{t("accountFlow1")}</li>
+                <li>{t("accountFlow2")}</li>
+                <li>{t("accountFlow3")}</li>
+              </ol>
+              <p className="mt-4 text-xs text-fg-subtle">{t("cardCheckoutHint")}</p>
+            </article>
+          ) : (
+            <article className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <ScanLine className="size-4 text-accent" />
+                  <h2 className="text-sm font-medium">{t("houseWallet")}</h2>
+                </div>
+                <Badge variant="outline">TRC-20 · 5 USDT</Badge>
               </div>
-            </div>
-            <p className="mt-3 text-left font-mono text-[11px] leading-relaxed text-fg-subtle" dir="ltr">
-              USDT {contract}
-            </p>
-            {network === "erc20" ? (
-              <p className="mt-2 text-xs text-fg-muted">{t("ethGas")}</p>
-            ) : (
-              <p className="mt-2 text-xs text-fg-muted">{t("tronFees")}</p>
-            )}
-          </article>
+              <UsdtJoinInstructions
+                address={address}
+                contract={contract}
+                network={network}
+                setNetwork={setNetwork}
+                t={t}
+              />
+            </article>
+          )}
 
           <article id="join" className="rounded-xl border border-border bg-surface p-5 sm:p-6">
-            <div className="flex items-center gap-2">
-              <Wallet className="size-4 text-accent" />
-              <h2 className="text-sm font-medium">{t("joinTitle")}</h2>
-            </div>
-            <p className="mt-3 text-sm leading-relaxed text-fg-muted">{t("joinBody")}</p>
-            <form
-              className="mt-5 space-y-4"
-              onSubmit={(event) => {
-                event.preventDefault();
-                if (walletError || !trimmed) return;
-                mutation.mutate();
-              }}
-            >
-              <div className="space-y-2">
-                <label htmlFor="wallet" className="text-xs font-medium text-fg-muted">
-                  {t("payoutWallet")}
-                </label>
-                <Input
-                  id="wallet"
-                  name="wallet"
-                  autoComplete="off"
-                  spellCheck={false}
-                  dir="ltr"
-                  placeholder={network === "trc20" ? "T................................" : "0x................................"}
-                  value={wallet}
-                  onChange={(event) => onWalletChange(event.target.value)}
-                  aria-invalid={Boolean(walletError)}
-                />
-                {walletError ? <p className="text-xs text-danger">{walletError}</p> : null}
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="country" className="text-xs font-medium text-fg-muted">
-                  {t("serveCountry")}
-                </label>
-                <select
-                  id="country"
-                  value={country}
-                  onChange={(event) => setCountry(event.target.value)}
-                  className="flex h-11 w-full rounded-md border border-border bg-surface-2 px-3 text-sm text-fg"
+            {membershipCheckoutV2 ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <Wallet className="size-4 text-accent" />
+                  <h2 className="text-sm font-medium">{t("accountJoinTitle")}</h2>
+                </div>
+                <p className="mt-3 text-sm leading-relaxed text-fg-muted">{t("accountJoinBody")}</p>
+                <div className="mt-5">
+                  <JoinAccountPanel country={country} onCountryChange={setCountry} />
+                </div>
+                {accountUsername ? <ActiveAccountBanner username={accountUsername} /> : null}
+                <Separator className="my-5" />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="w-full text-fg-muted"
+                  onClick={() => setShowUsdtJoin((value) => !value)}
                 >
-                  {COUNTRIES.map((item) => (
-                    <option key={item} value={item}>
-                      {countryLabel(item, lang)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <Button type="submit" size="lg" className="w-full" disabled={mutation.isPending || !trimmed || Boolean(walletError)}>
-                {mutation.isPending ? t("joining") : t("joinCta")}
-              </Button>
-            </form>
+                  {showUsdtJoin ? t("hideUsdtJoin") : t("orPayUsdt")}
+                </Button>
+                {showUsdtJoin ? (
+                  <div className="mt-4 space-y-4 border-t border-border pt-4">
+                    <p className="text-xs text-fg-muted">{t("legacyUsdtBody")}</p>
+                    <UsdtJoinForm
+                      wallet={wallet}
+                      network={network}
+                      country={country}
+                      walletError={walletError}
+                      mutationPending={mutation.isPending}
+                      trimmed={trimmed}
+                      onWalletChange={onWalletChange}
+                      onCountryChange={setCountry}
+                      onSubmit={() => mutation.mutate()}
+                      lang={lang}
+                      t={t}
+                    />
+                  </div>
+                ) : null}
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <Wallet className="size-4 text-accent" />
+                  <h2 className="text-sm font-medium">{t("joinTitle")}</h2>
+                </div>
+                <p className="mt-3 text-sm leading-relaxed text-fg-muted">{t("joinBody")}</p>
+                <UsdtJoinForm
+                  wallet={wallet}
+                  network={network}
+                  country={country}
+                  walletError={walletError}
+                  mutationPending={mutation.isPending}
+                  trimmed={trimmed}
+                  onWalletChange={onWalletChange}
+                  onCountryChange={setCountry}
+                  onSubmit={() => mutation.mutate()}
+                  lang={lang}
+                  t={t}
+                  className="mt-5"
+                />
+              </>
+            )}
 
             {pool.yourTickets > 0 ? (
               <div className="mt-4 rounded-md border border-border bg-accent-soft px-4 py-3">
@@ -347,14 +406,25 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
               pool.recent.map((row) => (
                 <li key={row.id} className="flex items-center justify-between gap-3 px-4 py-3">
                   <div className="min-w-0">
-                    <Link
-                      to="/adhud/$wallet"
-                      params={{ wallet: row.wallet }}
-                      className="truncate text-left font-mono text-sm hover:text-accent"
-                      dir="ltr"
-                    >
-                      {row.walletMasked}
-                    </Link>
+                    {row.displayName ? (
+                      <Link
+                        to="/member/$username"
+                        params={{ username: row.displayName }}
+                        className="truncate text-left font-mono text-sm hover:text-accent"
+                        dir="ltr"
+                      >
+                        {row.walletMasked}
+                      </Link>
+                    ) : (
+                      <Link
+                        to="/adhud/$wallet"
+                        params={{ wallet: row.wallet }}
+                        className="truncate text-left font-mono text-sm hover:text-accent"
+                        dir="ltr"
+                      >
+                        {row.walletMasked}
+                      </Link>
+                    )}
                     <p className="mt-0.5 text-[11px] text-fg-subtle">
                       {row.network === "trc20" ? "TRC-20" : "ERC-20"} · {formatTimeAgo(row.at, now, lang)}
                     </p>
@@ -421,7 +491,7 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
           </Button>
         ) : (
           <Button className="w-full" size="lg" onClick={scrollToJoin}>
-            {t("joinCta")}
+            {membershipCheckoutV2 ? t("createAccountCta") : t("joinCta")}
           </Button>
         )}
       </div>
@@ -518,5 +588,140 @@ function Step({ n, title, children }: { n: string; title: string; children: Reac
       <h3 className="mt-2 text-sm font-medium">{title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-fg-muted">{children}</p>
     </article>
+  );
+}
+
+function UsdtJoinInstructions({
+  address,
+  contract,
+  network,
+  setNetwork,
+  t,
+}: {
+  address: string;
+  contract: string;
+  network: Network;
+  setNetwork: (network: Network) => void;
+  t: (key: CopyKey) => string;
+}) {
+  return (
+    <>
+      <div className="mt-5 space-y-3">
+        <p className="text-xs font-medium text-accent">{t("joinFlowTitle")}</p>
+        <JoinFlowStep n="1" title={t("joinFlow1t")}>{t("joinFlow1")}</JoinFlowStep>
+        <JoinFlowStep n="2" title={t("joinFlow2t")}>{t("joinFlow2")}</JoinFlowStep>
+        <JoinFlowStep n="3" title={t("joinFlow3t")}>{t("joinFlow3")}</JoinFlowStep>
+      </div>
+      <div className="mt-4 space-y-2 rounded-md border border-danger/30 bg-danger/5 px-3 py-2.5 text-xs leading-relaxed text-fg-muted">
+        <p>{t("joinWarnNetwork")}</p>
+        <p>{t("joinWarnAmount")}</p>
+      </div>
+      <div className="mt-5 grid grid-cols-2 gap-1 rounded-lg bg-surface-2 p-1">
+        <NetworkTab active={network === "trc20"} onClick={() => setNetwork("trc20")} recommended>
+          TRC-20
+        </NetworkTab>
+        <NetworkTab active={network === "erc20"} onClick={() => setNetwork("erc20")} advanced>
+          ERC-20
+        </NetworkTab>
+      </div>
+      <div className="mx-auto mt-4 aspect-square w-full max-w-[220px] rounded-lg bg-paper p-3">
+        <WalletQr value={address} />
+      </div>
+      <p className="mt-3 text-center text-xs text-fg-subtle">{t("scanHint")}</p>
+      <div className="mt-4 rounded-md border border-border bg-surface-2 p-3">
+        <p className="text-[11px] text-fg-subtle">{t("address")}</p>
+        <div className="mt-1.5 flex items-center gap-2">
+          <p className="min-w-0 flex-1 break-all text-left font-mono text-[12px] leading-relaxed text-fg" dir="ltr">
+            {address}
+          </p>
+          <CopyButton value={address} />
+        </div>
+      </div>
+      <p className="mt-3 text-left font-mono text-[11px] leading-relaxed text-fg-subtle" dir="ltr">
+        USDT {contract}
+      </p>
+      {network === "erc20" ? (
+        <p className="mt-2 text-xs text-fg-muted">{t("ethGas")}</p>
+      ) : (
+        <p className="mt-2 text-xs text-fg-muted">{t("tronFees")}</p>
+      )}
+    </>
+  );
+}
+
+function UsdtJoinForm({
+  wallet,
+  network,
+  country,
+  walletError,
+  mutationPending,
+  trimmed,
+  onWalletChange,
+  onCountryChange,
+  onSubmit,
+  lang,
+  t,
+  className,
+}: {
+  wallet: string;
+  network: Network;
+  country: string;
+  walletError: string | null;
+  mutationPending: boolean;
+  trimmed: string;
+  onWalletChange: (value: string) => void;
+  onCountryChange: (country: string) => void;
+  onSubmit: () => void;
+  lang: "ar" | "en";
+  t: (key: CopyKey) => string;
+  className?: string;
+}) {
+  return (
+    <form
+      className={cn("space-y-4", className)}
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (walletError || !trimmed) return;
+        onSubmit();
+      }}
+    >
+      <div className="space-y-2">
+        <label htmlFor="wallet" className="text-xs font-medium text-fg-muted">
+          {t("payoutWallet")}
+        </label>
+        <Input
+          id="wallet"
+          name="wallet"
+          autoComplete="off"
+          spellCheck={false}
+          dir="ltr"
+          placeholder={network === "trc20" ? "T................................" : "0x................................"}
+          value={wallet}
+          onChange={(event) => onWalletChange(event.target.value)}
+          aria-invalid={Boolean(walletError)}
+        />
+        {walletError ? <p className="text-xs text-danger">{walletError}</p> : null}
+      </div>
+      <div className="space-y-2">
+        <label htmlFor="country" className="text-xs font-medium text-fg-muted">
+          {t("serveCountry")}
+        </label>
+        <select
+          id="country"
+          value={country}
+          onChange={(event) => onCountryChange(event.target.value)}
+          className="flex h-11 w-full rounded-md border border-border bg-surface-2 px-3 text-sm text-fg"
+        >
+          {COUNTRIES.map((item) => (
+            <option key={item} value={item}>
+              {countryLabel(item, lang)}
+            </option>
+          ))}
+        </select>
+      </div>
+      <Button type="submit" size="lg" className="w-full" disabled={mutationPending || !trimmed || Boolean(walletError)}>
+        {mutationPending ? t("joining") : membershipCheckoutV2 ? t("joinUsdtCta") : t("joinCta")}
+      </Button>
+    </form>
   );
 }

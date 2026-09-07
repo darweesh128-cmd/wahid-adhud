@@ -1,8 +1,9 @@
 import { createHash, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { createServerFn } from "@tanstack/react-start";
+import { activateMembership } from "@/lib/membership-activate";
 import { getSql } from "@/lib/db";
+import { loadPoolConfig, loadSnapshot } from "@/lib/pool-snapshot";
 import {
-  DEFAULT_POOL_ADDRESSES,
   HOUSE_WALLET,
   countryFromWallet,
   detectNetwork,
@@ -16,10 +17,12 @@ import {
   type MemberProfile,
   type Network,
   type NetworkSnapshot,
-  type PoolAddresses,
   type PoolSnapshot,
-  type PreviousRound,
 } from "@/lib/pool";
+import {
+  completeCheckoutSession,
+} from "@/lib/stripe-checkout";
+import { accountDeskWallet } from "@/lib/username";
 
 type RoundRow = {
   id: number;
@@ -32,27 +35,9 @@ type RoundRow = {
   created_at: string;
 };
 
-type DonationRow = {
-  id: number;
-  payout_wallet: string;
-  network: Network;
-  amount_usdt: number;
-  created_at: string;
-};
-
-type ConfigRow = {
-  id: number;
-  trc20_address: string;
-  erc20_address: string;
-  owner_pass_salt: string | null;
-  owner_pass_hash: string | null;
-};
-
 const HOURLY_CAP = 12;
 const OWNER_ATTEMPT_CAP = 8;
 const MESSAGE_CAP = 30;
-const HOUSE_WELCOME =
-  "The House is open. This desk is yours — ledger, messages, any ʿAḍīd. Your dollar is an arm.";
 
 function hashStamp(ip: string): string {
   return createHash("sha256").update(`waahid:${ip}`).digest("hex").slice(0, 20);
@@ -76,130 +61,8 @@ function verifyPassword(password: string, salt: string, hash: string): boolean {
   return timingSafeEqual(next, prev);
 }
 
-function toSnapshot(
-  round: RoundRow,
-  recent: DonationRow[],
-  previous: PreviousRound | null,
-  yourTickets: number,
-  addresses: PoolAddresses,
-  hasOwnerLock: boolean,
-): PoolSnapshot {
-  const collected = Number(round.collected_usdt);
-  const target = Number(round.target_usdt);
-  return {
-    roundId: Number(round.id),
-    target,
-    collected,
-    donorCount: Number(round.donor_count),
-    remaining: Math.max(0, target - collected),
-    progress: target > 0 ? Math.min(1, collected / target) : 0,
-    status: round.status,
-    winnerWallet: round.winner_wallet,
-    winnerMasked: round.winner_wallet ? maskWallet(round.winner_wallet) : null,
-    recent: recent.map((row) => ({
-      id: Number(row.id),
-      wallet: row.payout_wallet,
-      walletMasked: maskWallet(row.payout_wallet),
-      network: row.network,
-      amount: Number(row.amount_usdt),
-      at: String(row.created_at),
-    })),
-    previous,
-    yourTickets,
-    addresses,
-    hasOwnerLock,
-  };
-}
-
-async function ensureConfig(): Promise<ConfigRow> {
-  const sql = await getSql();
-  const rows = await sql<ConfigRow>`
-    select id, trc20_address, erc20_address, owner_pass_salt, owner_pass_hash
-    from pool_config
-    where id = 1
-    limit 1
-  `;
-  if (rows[0]) return rows[0];
-  const created = await sql<ConfigRow>`
-    insert into pool_config (id, trc20_address, erc20_address)
-    values (${1}, ${DEFAULT_POOL_ADDRESSES.trc20}, ${DEFAULT_POOL_ADDRESSES.erc20})
-    on conflict (id) do update set id = pool_config.id
-    returning id, trc20_address, erc20_address, owner_pass_salt, owner_pass_hash
-  `;
-  return created[0] ?? {
-    id: 1,
-    trc20_address: DEFAULT_POOL_ADDRESSES.trc20,
-    erc20_address: DEFAULT_POOL_ADDRESSES.erc20,
-    owner_pass_salt: null,
-    owner_pass_hash: null,
-  };
-}
-
-async function loadSnapshot(wallet?: string): Promise<PoolSnapshot> {
-  const sql = await getSql();
-  const config = await ensureConfig();
-  const addresses: PoolAddresses = {
-    trc20: config.trc20_address,
-    erc20: config.erc20_address,
-  };
-  const hasOwnerLock = Boolean(config.owner_pass_hash);
-
-  const openRows = await sql<RoundRow>`
-    select id, target_usdt, collected_usdt, donor_count, status, winner_wallet, settled_at, created_at
-    from rounds
-    where status = 'open'
-    order by id desc
-    limit 1
-  `;
-  let round = openRows[0];
-  if (!round) {
-    const created = await sql<RoundRow>`
-      insert into rounds (target_usdt, collected_usdt, donor_count, status)
-      values (${TARGET_USDT}, 0, 0, 'open')
-      returning id, target_usdt, collected_usdt, donor_count, status, winner_wallet, settled_at, created_at
-    `;
-    round = created[0];
-  }
-
-  const recent = await sql<DonationRow>`
-    select id, payout_wallet, network, amount_usdt, created_at
-    from donations
-    where round_id = ${round.id}
-    order by created_at desc, id desc
-    limit 18
-  `;
-
-  const prevRows = await sql<RoundRow>`
-    select id, target_usdt, collected_usdt, donor_count, status, winner_wallet, settled_at, created_at
-    from rounds
-    where status = 'settled' and winner_wallet is not null
-    order by id desc
-    limit 1
-  `;
-  const prev = prevRows[0];
-  const previous: PreviousRound | null =
-    prev && prev.winner_wallet && prev.settled_at
-      ? {
-          roundId: Number(prev.id),
-          winnerWallet: prev.winner_wallet,
-          winnerMasked: maskWallet(prev.winner_wallet),
-          settledAt: String(prev.settled_at),
-          collected: Number(prev.collected_usdt),
-          donorCount: Number(prev.donor_count),
-        }
-      : null;
-
-  let yourTickets = 0;
-  if (wallet && isValidWallet(wallet)) {
-    const ticketRows = await sql<{ n: number }>`
-      select count(*)::int as n
-      from donations
-      where round_id = ${round.id} and payout_wallet = ${wallet.trim()}
-    `;
-    yourTickets = Number(ticketRows[0]?.n ?? 0);
-  }
-
-  return toSnapshot(round, recent, previous, yourTickets, addresses, hasOwnerLock);
+async function ensureConfig() {
+  return loadPoolConfig();
 }
 
 async function tooManyOwnerAttempts(): Promise<boolean> {
@@ -346,59 +209,45 @@ export const contribute = createServerFn({ method: "POST" })
     if (Number(recentFromStamp[0]?.n ?? 0) >= HOURLY_CAP) {
       return { ok: false, error: "Hourly limit reached from this device. Try later." };
     }
-    const openRows = await sql<RoundRow>`
-      select id, target_usdt, collected_usdt, donor_count, status, winner_wallet, settled_at, created_at
-      from rounds where status = 'open' order by id desc limit 1 for update
-    `;
-    const round = openRows[0];
-    if (!round) return { ok: false, error: "No open round." };
-    if (Number(round.collected_usdt) >= Number(round.target_usdt)) {
-      return { ok: false, error: "This round is full." };
-    }
-    const prior = await sql<{ id: number }>`
-      select id from donations where round_id = ${round.id} and payout_wallet = ${wallet} limit 1
-    `;
-    const isNewDonor = prior.length === 0;
-    await sql`
-      insert into donations (round_id, payout_wallet, network, amount_usdt, client_stamp, ref_slug)
-      values (${round.id}, ${wallet}, ${detected}, ${UNIT_USDT}, ${stamp}, ${data.ref})
-    `;
-    await sql`
-      insert into members (payout_wallet, country, given_usdt)
-      values (${wallet}, ${data.country}, ${UNIT_USDT})
-      on conflict (payout_wallet) do update set
-        country = excluded.country,
-        given_usdt = members.given_usdt + ${UNIT_USDT},
-        updated_at = now()
-    `;
-    if (isNewDonor) {
-      await sql`
-        insert into messages (from_wallet, to_wallet, body)
-        values (${HOUSE_WALLET}, ${wallet}, ${HOUSE_WELCOME})
+    return activateMembership(
+      { wallet, country: data.country, ref: data.ref, stamp, amountUsdt: UNIT_USDT },
+      loadSnapshot,
+    );
+  });
+
+export type CheckoutStatusResult =
+  | { ok: true; status: "completed"; snapshot: PoolSnapshot; username: string }
+  | { ok: true; status: "pending" }
+  | { ok: false; error: string };
+
+export const getMembershipCheckoutStatus = createServerFn({ method: "GET" })
+  .validator((data: unknown) => {
+    if (data == null || typeof data !== "object") throw new Error("Invalid data");
+    const sessionId = "sessionId" in data ? data.sessionId : undefined;
+    if (typeof sessionId !== "string" || !sessionId.trim()) throw new Error("Missing session id");
+    return { sessionId: sessionId.trim().slice(0, 256) };
+  })
+  .handler(async ({ data }): Promise<CheckoutStatusResult> => {
+    const stamp = await clientStamp();
+    const result = await completeCheckoutSession(data.sessionId, stamp);
+    if (result.status === "completed" && result.username) {
+      const sql = await getSql();
+      const rows = await sql<{ id: number }>`
+        select id from adhud_accounts where lower(username) = ${result.username.toLowerCase()} limit 1
       `;
+      const accountId = rows[0]?.id;
+      const wallet = accountId ? accountDeskWallet(accountId) : undefined;
+      return {
+        ok: true,
+        status: "completed",
+        username: result.username,
+        snapshot: await loadSnapshot(wallet),
+      };
     }
-    const updatedRows = await sql<RoundRow>`
-      update rounds set
-        collected_usdt = collected_usdt + ${UNIT_USDT},
-        donor_count = donor_count + ${isNewDonor ? 1 : 0}
-      where id = ${round.id} and status = 'open'
-      returning id, target_usdt, collected_usdt, donor_count, status, winner_wallet, settled_at, created_at
-    `;
-    const updated = updatedRows[0];
-    if (!updated) return { ok: false, error: "Could not update the pool." };
-    if (Number(updated.collected_usdt) >= Number(updated.target_usdt)) {
-      const winnerRows = await sql<{ payout_wallet: string }>`
-        select payout_wallet from donations where round_id = ${round.id} order by random() limit 1
-      `;
-      const winnerWallet = winnerRows[0]?.payout_wallet ?? wallet;
-      await sql`
-        update rounds set status = 'settled', winner_wallet = ${winnerWallet}, settled_at = now()
-        where id = ${round.id}
-      `;
-      await sql`insert into rounds (target_usdt, collected_usdt, donor_count, status) values (${TARGET_USDT}, 0, 0, 'open')`;
-      return { ok: true, settled: true, winnerWallet, snapshot: await loadSnapshot(wallet) };
+    if (result.status === "pending") {
+      return { ok: true, status: "pending" };
     }
-    return { ok: true, settled: false, snapshot: await loadSnapshot(wallet) };
+    return { ok: false, error: result.error ?? "Checkout could not be confirmed." };
   });
 
 export const getNetwork = createServerFn({ method: "GET" }).handler(async (): Promise<NetworkSnapshot> => {

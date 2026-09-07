@@ -55,6 +55,7 @@ export type DonationPreview = {
   id: number;
   wallet: string;
   walletMasked: string;
+  displayName: string | null;
   network: Network;
   amount: number;
   at: string;
@@ -210,3 +211,4 @@ export const WALLET_STORAGE_KEY = "waahid-wallet";
 export const NETWORK_STORAGE_KEY = "waahid-network";
 export const OWNER_STORAGE_KEY = "waahid-owner";
 export const COUNTRY_STORAGE_KEY = "waahid-country";
+export const ACCOUNT_USERNAME_STORAGE_KEY = "waahid-username";
