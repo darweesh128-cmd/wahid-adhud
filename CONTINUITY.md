@@ -1,7 +1,7 @@
 # Wahid · The Adhud — Continuity (Cursor-ready)
 
 **Purpose:** Resume from Cursor or Grok Bot anytime. **No secrets in this file.**  
-**Last updated:** 2026-09-07 ~14:45 Asia/Riyadh (UTC+3)  
+**Last updated:** 2026-09-07 ~14:50 Asia/Riyadh (UTC+3)  
 **Scope lock:** `darweesh128-cmd/wahid-adhud` only — do not touch other projects.
 
 ## Snapshot (NOW)
@@ -10,7 +10,7 @@
 |------|--------|
 | Live site | **https://www.adhud.xyz** HTTP 200 · **English-only** (`lang=en`, Arabic toggle removed, `waahid-lang` purge) |
 | Apex | https://adhud.xyz → 308 → www |
-| Production join | **$1 membership checkout v2** — **Open account · $1** (code default ON after PR #15) |
+| Production join | **LIVE** — **Open account · $1** on https://www.adhud.xyz (HTTP 200, verified curl) |
 | $1 live preview | **https://temporary-swift-redwood-bejsfjj.vercel.app** HTTP 200 · claim `87ef6955-ecfe-453b-a0fb-56935d640326` |
 | Checkout mode | **Mock/test** unless live `sk_live` + `ALLOW_STRIPE_LIVE=true` in Vercel env |
 | Legacy USDT | **5 USDT TRC-20** collapsible **Or join with USDT** (House `TVmEo3Mn6dJfAWgk8KUF7rEvcdbdegmDER`) |
@@ -27,10 +27,10 @@
 |------|--------|
 | GitHub | https://github.com/darweesh128-cmd/wahid-adhud |
 | Default branch | `main` |
-| Tip (at continuity write) | PR #15 membership v2 default ON |
+| Tip (at continuity write) | `0bf720c` — PR #15 merged; www v2 live |
 
 ### Merged PRs
-#14 preview URL · #13 build env · #12 vercel.json · #11 CONTINUITY preview · #7 membership $1 · #6 English-only
+#15 v2 default ON · #14 preview URL · #13 build env · #12 vercel.json · #7 membership $1 · #6 English-only
 
 ## Feature flags (names only)
 - `MEMBERSHIP_CHECKOUT_V2` / `VITE_MEMBERSHIP_CHECKOUT_V2` — **default ON** in code; env opt-out with `false`
@@ -39,8 +39,8 @@
 - `DATABASE_URL` — Neon `wahid-adhud` / `little-field-83907551`
 
 ## Live / deploy
-- Canonical https://www.adhud.xyz · Vercel Valid
-- Git push to `main` should redeploy; if stale, `npm run build && npx vercel deploy --prebuilt --temporary --yes` + claim
+- Canonical https://www.adhud.xyz · Vercel Valid · **v2 UI live** (asset `index-BMyCKiwL.js`)
+- Deploy: git push `main` → Vercel production; code defaults v2 ON (PR #15)
 - English-only via PR #6
 
 ## Join
@@ -56,7 +56,6 @@
 2. TikTok: mid-signup via mail.tm
 3. Reddit: account creation in progress
 4. Stripe live: mock until CEO `sk_live` + `ALLOW_STRIPE_LIVE=true`
-5. Vercel prod deploy: needs `VERCEL_TOKEN` or claim preview to assign `www.adhud.xyz`
 
 ## How to resume in Cursor
 1. Open `darweesh128-cmd/wahid-adhud` on `main`; read this file
