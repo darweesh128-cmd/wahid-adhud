@@ -4,7 +4,7 @@ Wahid product: **$1 USD membership** via username-first account creation, then h
 
 **Live payment provider:** **Lemon Squeezy** (Mohamad cutover). Stripe Checkout remains as optional dev/test code path; Stripe live keys are **not required** for production.
 
-> **Payout note:** Lemon Squeezy collects membership fees; Mohamad pays Lemon from crypto wallet later. No US entity or Stripe live keys needed for cutover.
+> **Payout note:** Lemon Squeezy is MoR for **collection** ($1 checkout + webhook). **Payouts** from Lemon are **bank or PayPal only** — not crypto wallets ([Lemon docs](https://docs.lemonsqueezy.com/help/getting-started/getting-paid)). Mohamad may withdraw to bank/PayPal and convert off-platform, or ops may switch MoR later. No US entity or Stripe live keys needed for cutover.
 
 ## Feature flag
 

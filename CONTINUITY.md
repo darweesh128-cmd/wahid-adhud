@@ -12,8 +12,8 @@
 | Apex | https://adhud.xyz → 308 → www |
 | Production join | **LIVE** — **Open account · $1** on https://www.adhud.xyz |
 | SEO | Title/meta/og say **Open account · $1** (no 5 USDT lead) — PR #17 merged |
-| Live payment target | **Lemon Squeezy** collects $1 membership at cutover (not Stripe live keys) |
-| Payout ops | Mohamad pays Lemon from crypto wallet later; Stripe live **not required** for cutover |
+| Live payment target | **Lemon Squeezy** MoR — collects $1 membership at cutover (not Stripe live keys) |
+| Payout ops | Lemon pays out to **bank or PayPal only** (not crypto wallets). Mohamad withdraws via bank/PayPal and converts off-platform if needed; **or** switch MoR later. Stripe live **not required** for cutover |
 | Checkout mode | **Lemon** when `LEMON_SQUEEZY_*` env set; else **mock** `/checkout/mock`; Stripe test/mock remains as alternate code path |
 | Legacy USDT | **5 USDT TRC-20** collapsible **Or join with USDT** (House `TVmEo3Mn6dJfAWgk8KUF7rEvcdbdegmDER`) |
 | $1 membership | Code merged (PR #7); v2 default ON (PR #15); Lemon webhook at `POST /api/lemon/webhook` |
@@ -51,7 +51,8 @@
 ## Join
 - Primary: **$1** Open account + username + **Lemon Squeezy** checkout (live) or mock (dev)
 - Secondary: 5 USDT TRC-20 (House address preserved)
-- Stripe live keys **not required** — Mohamad funds Lemon payout from crypto wallet separately
+- **Payout:** Lemon Squeezy settles to linked **bank or PayPal** account (USD; min $50 threshold per Lemon). Crypto wallet payout is **not** Lemon-native — Mohamad converts off-platform after bank/PayPal withdrawal, or ops may choose a different MoR later
+- Stripe live keys **not required** for cutover
 
 ## Social CRITICAL
 ### Allowed: X **@adudadid** only · https://www.adhud.xyz
@@ -61,7 +62,7 @@
 1. X @adudadid: Hotmail unlock in progress
 2. TikTok: mid-signup via mail.tm
 3. Reddit: account creation in progress
-4. Lemon Squeezy: set Vercel env vars + register webhook for live $1 collection
+4. Lemon Squeezy: set Vercel env vars + register webhook for live $1 collection; link bank or PayPal payout in Lemon dashboard (no crypto payout option)
 
 ## How to resume in Cursor
 1. Open `darweesh128-cmd/wahid-adhud` on `main`; read this file
