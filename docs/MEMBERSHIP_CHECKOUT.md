@@ -1,31 +1,10 @@
 # Membership checkout (v2)
 
-$1 USD membership via **username-first account creation**, then **Stripe Checkout (test mode only)**. Legacy **5 USDT** self-attest join stays available until cutover.
+Wahid product: **$1 USD membership** via username-first account creation, then **Stripe Checkout (test mode)**. Legacy **5 USDT** join stays available until cutover.
 
-**Payment provider:** Stripe Checkout (preferred). Lemon Squeezy is not wired in this PR.
+**Payment provider:** Stripe Checkout (preferred). Lemon Squeezy is not wired.
 
-## US entity & payouts (do not wire production yet)
-
-| Item | Status |
-|------|--------|
-| Proposed entity | **Ashrim LLC** (Wyoming) |
-| Filing | **Not filed yet** |
-| EIN | Not available |
-| Company bank | Not available |
-| Production payouts | **Blocked** — do not connect live Stripe or company payout rails |
-
-**Production Stripe keys (`sk_live_*`) must wait** until:
-
-1. Wyoming LLC is filed and active  
-2. EIN is issued  
-3. Company bank account is open and linked to Stripe  
-
-Until then, use only:
-
-- Built-in **mock simulator** (`/checkout/mock`) — no keys  
-- Stripe **test mode** (`sk_test_...`, `whsec_...` from test dashboard)
-
-The server **ignores `sk_live_*`** unless `ALLOW_STRIPE_LIVE=true` (do not set until the checklist above is complete).
+> **Note:** US company formation (e.g. separate Wyoming LLC workstream) is **not a dependency** for building, testing, or merging this product path. Ship the flagged v2 flow with test keys or the mock simulator now.
 
 ## Feature flag
 
@@ -34,9 +13,9 @@ The server **ignores `sk_live_*`** unless `ALLOW_STRIPE_LIVE=true` (do not set u
 | `VITE_MEMBERSHIP_CHECKOUT_V2=true` | Build / client | Shows Open account + $1 flow |
 | `MEMBERSHIP_CHECKOUT_V2=true` | Server | Enables account APIs, checkout, webhooks |
 
-**Default (flag off):** only the existing 5 USDT join path — no behavior change on production today.
+**Default (flag off):** existing 5 USDT join only — production unchanged today.
 
-## Join flow (flag on)
+## Product flow (flag on)
 
 ```
 Open account · $1
@@ -44,58 +23,59 @@ Open account · $1
     → Create account & pay $1 (adhud_accounts row first, status=pending)
     → Checkout:
          • Stripe Checkout TEST when STRIPE_SECRET_KEY=sk_test_...
-         • Mock simulator at /checkout/mock when no usable Stripe key
+         • Mock simulator at /checkout/mock when no Stripe key
     → Payment success (webhook or mock)
     → Membership active; ledger display_name=@username
     → Desk at /member/{username}
 ```
 
-## Checkout modes
+## Checkout modes (build & test now)
 
 | Mode | When | Notes |
 |------|------|--------|
-| **mock** | No `sk_test_...` key (default in dev) | `/checkout/mock` — no external accounts |
-| **stripe** | `STRIPE_SECRET_KEY=sk_test_...` | Hosted Checkout **test mode only** |
+| **mock** | No `sk_test_...` (default in dev) | `/checkout/mock` — zero external setup |
+| **stripe** | `STRIPE_SECRET_KEY=sk_test_...` | Hosted Checkout **test mode** |
 | **off** | Flag off | Legacy USDT only |
 
-Force mock even with test keys: `MEMBERSHIP_CHECKOUT_MOCK=true`
+Force mock with test keys set: `MEMBERSHIP_CHECKOUT_MOCK=true`
 
 ## Environment variables (placeholders — no secrets in git)
 
-### Enable v2 flow (dev / staging)
+### Enable v2 (dev / staging / preview)
 
 ```
 VITE_MEMBERSHIP_CHECKOUT_V2=true
 MEMBERSHIP_CHECKOUT_V2=true
 ```
 
-### Stripe test mode only (safe before US entity)
+### Stripe test mode (use now)
 
 ```
-STRIPE_SECRET_KEY=sk_test_...          # TEST only — never sk_live_ until entity ready
-STRIPE_WEBHOOK_SECRET=whsec_...        # from `stripe listen` or test webhook endpoint
-STRIPE_PRICE_ID=price_...              # optional test price; inline $1 used if omitted
-BETTER_AUTH_URL=https://www.adhud.xyz  # success/cancel redirect origin
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_PRICE_ID=price_...              # optional; inline $1 price_data if omitted
+BETTER_AUTH_URL=https://www.adhud.xyz
 ```
 
 ### Optional
 
 ```
-MEMBERSHIP_CHECKOUT_MOCK=true          # force simulator
+MEMBERSHIP_CHECKOUT_MOCK=true
 VITE_PUBLIC_HOSTNAME=www.adhud.xyz
 ```
 
-### Production (blocked until entity + EIN + bank)
+## TODO — production live keys (CEO request only, later)
 
-```
-# DO NOT SET until Ashrim LLC (Wyoming) is filed, EIN issued, company bank linked:
-# STRIPE_SECRET_KEY=sk_live_...
-# ALLOW_STRIPE_LIVE=true               # explicit opt-in gate for live keys
-```
+Do **not** add live keys in this PR. When the CEO requests go-live:
 
-### Lemon Squeezy
+- [ ] **TODO:** Obtain `sk_live_...` and live webhook secret from CEO / ops (not self-serve)
+- [ ] **TODO:** Confirm payout destination entity + bank are ready (separate from Wahid product work)
+- [ ] **TODO:** Set `ALLOW_STRIPE_LIVE=true` only after CEO sign-off
+- [ ] **TODO:** Point `STRIPE_SECRET_KEY` at live key in production env (never commit)
+- [ ] **TODO:** Register live webhook URL `POST /api/stripe/webhook` in Stripe dashboard
+- [ ] **TODO:** Decide USDT cutover — hide secondary panel when card path is primary
 
-Deferred. If needed later, same username-first sequence; Stripe remains preferred.
+Until then, the server **ignores `sk_live_*`** unless `ALLOW_STRIPE_LIVE=true` (safety gate).
 
 ## API surface
 
@@ -105,8 +85,8 @@ Deferred. If needed later, same username-first sequence; Stripe remains preferre
 | `checkAdhudUsername` | Uniqueness check |
 | `createAdhudAccount` | Create account → checkout URL |
 | `payMockCheckout` | Complete mock payment |
-| `POST /api/stripe/webhook` | Stripe `checkout.session.completed` (test) |
-| `GET /checkout/mock` | Dev/QA payment simulator |
+| `POST /api/stripe/webhook` | Stripe `checkout.session.completed` |
+| `GET /checkout/mock` | Payment simulator (no keys) |
 
 ## Database
 
@@ -115,30 +95,20 @@ Deferred. If needed later, same username-first sequence; Stripe remains preferre
 
 ## Test plan
 
-### Mock simulator (no keys, no entity)
+### Mock simulator (no Stripe account)
 
 1. `VITE_MEMBERSHIP_CHECKOUT_V2=true` + `MEMBERSHIP_CHECKOUT_V2=true`
 2. **Open account · $1** → username → **Create account & pay $1**
 3. `/checkout/mock` → **Simulate successful payment**
 4. `@username` on ledger; `/member/{username}` desk
 
-### Stripe test mode (before company exists)
+### Stripe test mode
 
-1. Create Stripe account in **test mode** (personal/dashboard OK for dev)
-2. `STRIPE_SECRET_KEY=sk_test_...`, `STRIPE_WEBHOOK_SECRET`
-3. `stripe listen --forward-to localhost:8080/api/stripe/webhook`
-4. Test card `4242 4242 4242 4242` → webhook activates membership
+1. Stripe dashboard → **test mode** → copy `sk_test_...`
+2. `stripe listen --forward-to localhost:8080/api/stripe/webhook`
+3. Card `4242 4242 4242 4242` → membership activates via webhook
 
 ### Legacy USDT
 
-- Flag **on:** USDT under **Or join with USDT** (secondary)
-- Flag **off:** production default — 5 USDT only
-
-## Go-live checklist (future — not blocking this PR)
-
-- [ ] Ashrim LLC (Wyoming) filed  
-- [ ] EIN received  
-- [ ] Company bank account opened  
-- [ ] Stripe live account linked to company bank  
-- [ ] `sk_live_...` + `ALLOW_STRIPE_LIVE=true`  
-- [ ] Retire or hide USDT secondary path when ready  
+- Flag **on:** collapsible **Or join with USDT**
+- Flag **off:** 5 USDT only (current production default)
