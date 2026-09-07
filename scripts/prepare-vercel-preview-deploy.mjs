@@ -53,27 +53,20 @@ const files = [];
 
 walk(root, files);
 
-const previewEnv = {
-  VITE_MEMBERSHIP_CHECKOUT_V2: "true",
-  MEMBERSHIP_CHECKOUT_V2: "true",
-};
+const vercelConfig = JSON.parse(readFileSync(join(root, "vercel.json"), "utf8"));
+const deployEnv = vercelConfig.env ?? vercelConfig.build?.env ?? {};
 
 files.push({
   file: ".grok/app-env.json",
   data: JSON.stringify({ VITE_MEMBERSHIP_CHECKOUT_V2: "true" }, null, 2) + "\n",
 });
 
+// Ensure bundled vercel.json matches repo (walk may have picked up an older copy).
+const vercelIdx = files.findIndex((f) => f.file === "vercel.json");
+if (vercelIdx >= 0) files.splice(vercelIdx, 1);
 files.push({
   file: "vercel.json",
-  data:
-    JSON.stringify(
-      {
-        build: { env: previewEnv },
-        env: previewEnv,
-      },
-      null,
-      2,
-    ) + "\n",
+  data: JSON.stringify(vercelConfig, null, 2) + "\n",
 });
 
 process.stdout.write(
