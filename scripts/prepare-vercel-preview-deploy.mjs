@@ -23,6 +23,11 @@ const SKIP_DIRS = new Set([
 ]);
 
 const SKIP_FILES = new Set([".env", ".DS_Store"]);
+const SKIP_PATTERNS = [
+  /\.test\.mjs$/,
+  /public\/__grok\/install\/assets\/homescreen\/ob-(phone|ipad)\.png$/,
+  /public\/og\.jpg$/,
+];
 
 function walk(dir, out) {
   for (const name of readdirSync(dir)) {
@@ -30,6 +35,7 @@ function walk(dir, out) {
     const abs = join(dir, name);
     const rel = relative(root, abs).replace(/\\/g, "/");
     if (SKIP_FILES.has(name) || rel.startsWith(".env.")) continue;
+    if (SKIP_PATTERNS.some((re) => re.test(rel))) continue;
     const st = statSync(abs);
     if (st.isDirectory()) {
       walk(abs, out);
