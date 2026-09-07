@@ -5,16 +5,17 @@ import { PoolApp } from "@/components/pool/pool-app";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Wahid · Join with 5 USDT TRC-20 | The ʿAḍud" },
+      { title: "Wahid · Open account · $1 membership | The ʿAḍud" },
       {
         name: "description",
         content:
-          "Pay 5 USDT on TRC-20 and become ʿAḍīd. Wallet-level mutual aid — no account, no KYC. Your wallet is your desk.",
+          "Open your account and join The ʿAḍud — $1 membership, mutual solidarity, trust first. Become ʿAḍīd. Do not join to take. Join because you are someone's arm.",
       },
-      { property: "og:title", content: "Wahid · Join with 5 USDT TRC-20" },
+      { property: "og:title", content: "Wahid · Open account · $1 membership" },
       {
         property: "og:description",
-        content: "The ʿAḍud — 5 USDT on TRC-20. No KYC. Send to three after you join.",
+        content:
+          "The ʿAḍud — open account, $1 membership. Mutual solidarity and trust. Send to three after you join.",
       },
     ],
   }),
