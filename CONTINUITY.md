@@ -1,7 +1,7 @@
 # Wahid · The Adhud — Continuity (Cursor-ready)
 
 **Purpose:** Resume from Cursor or Grok Bot anytime. **No secrets in this file.**  
-**Last updated:** 2026-09-07 ~14:30 Asia/Riyadh (UTC+3)  
+**Last updated:** 2026-09-07 ~14:40 Asia/Riyadh (UTC+3)  
 **Scope lock:** `darweesh128-cmd/wahid-adhud` only — do not touch other projects.
 
 ## Snapshot (NOW)
@@ -10,7 +10,8 @@
 |------|--------|
 | Live site | **https://www.adhud.xyz** HTTP 200 · **English-only** (`lang=en`, Arabic toggle removed, `waahid-lang` purge) |
 | Apex | https://adhud.xyz → 308 → www |
-| Production join | **$1 membership checkout v2** — **Open account · $1** primary UX |
+| Production join | **$1 membership checkout v2** — **Open account · $1** primary UX (www still 5 USDT until claim redeploy) |
+| $1 live preview | **https://temporary-instant-vega-ogx7ypz.vercel.app** HTTP 200 · Open account · $1 · claim `a151f865-a2fa-4ff3-82ff-6de3ad8d76f0` |
 | Checkout mode | **Mock/test** unless live `sk_live` + `ALLOW_STRIPE_LIVE=true` in Vercel env (no `sk_live` wired as of cutover) |
 | Legacy USDT | **5 USDT TRC-20** still available via collapsible **Or join with USDT** (House address path preserved) |
 | $1 membership | Code merged (PR #7); **production flag ON** via `vercel.json` + Vercel env (PR cutover) |
@@ -39,7 +40,8 @@
 - `DATABASE_URL` — secrets only; Neon `wahid-adhud` / `little-field-83907551`; migrations through 0009
 
 ## Live / deploy
-- Canonical https://www.adhud.xyz · Domain adhud.xyz on Vercel Valid · production join **$1 Open account** (v2 ON)
+- Canonical https://www.adhud.xyz · Domain adhud.xyz on Vercel Valid · **www still 5 USDT** until Mohamad claims preview
+- $1 live preview: https://temporary-instant-vega-ogx7ypz.vercel.app · claim https://vercel.com/claim-deployment?code=a151f865-a2fa-4ff3-82ff-6de3ad8d76f0
 - `vercel.json` sets `MEMBERSHIP_CHECKOUT_V2` + `VITE_MEMBERSHIP_CHECKOUT_V2` for git-triggered production builds
 - English-only via PR #6 live
 - Self-heal on non-200 via temporary claim redeploy pattern
