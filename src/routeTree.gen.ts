@@ -16,6 +16,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AdhudWalletRouteImport } from './routes/adhud.$wallet'
 import { Route as CheckoutMockRouteImport } from './routes/checkout.mock'
 import { Route as MemberUsernameRouteImport } from './routes/member.$username'
+import { Route as ApiLemonWebhookRouteImport } from './routes/api/lemon/webhook'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -53,6 +54,11 @@ const MemberUsernameRoute = MemberUsernameRouteImport.update({
   path: '/member/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiLemonWebhookRoute = ApiLemonWebhookRouteImport.update({
+  id: '/api/lemon/webhook',
+  path: '/api/lemon/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
   id: '/api/stripe/webhook',
   path: '/api/stripe/webhook',
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/adhud/$wallet': typeof AdhudWalletRoute
   '/checkout/mock': typeof CheckoutMockRoute
   '/member/$username': typeof MemberUsernameRoute
+  '/api/lemon/webhook': typeof ApiLemonWebhookRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/adhud/$wallet': typeof AdhudWalletRoute
   '/checkout/mock': typeof CheckoutMockRoute
   '/member/$username': typeof MemberUsernameRoute
+  '/api/lemon/webhook': typeof ApiLemonWebhookRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
 export interface FileRoutesById {
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/adhud/$wallet': typeof AdhudWalletRoute
   '/checkout/mock': typeof CheckoutMockRoute
   '/member/$username': typeof MemberUsernameRoute
+  '/api/lemon/webhook': typeof ApiLemonWebhookRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
 export interface FileRouteTypes {
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/adhud/$wallet'
     | '/checkout/mock'
     | '/member/$username'
+    | '/api/lemon/webhook'
     | '/api/stripe/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
     | '/adhud/$wallet'
     | '/checkout/mock'
     | '/member/$username'
+    | '/api/lemon/webhook'
     | '/api/stripe/webhook'
   id:
     | '__root__'
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
     | '/adhud/$wallet'
     | '/checkout/mock'
     | '/member/$username'
+    | '/api/lemon/webhook'
     | '/api/stripe/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -131,6 +143,7 @@ export interface RootRouteChildren {
   AdhudWalletRoute: typeof AdhudWalletRoute
   CheckoutMockRoute: typeof CheckoutMockRoute
   MemberUsernameRoute: typeof MemberUsernameRoute
+  ApiLemonWebhookRoute: typeof ApiLemonWebhookRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
 }
 
@@ -185,6 +198,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemberUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/lemon/webhook': {
+      id: '/api/lemon/webhook'
+      path: '/api/lemon/webhook'
+      fullPath: '/api/lemon/webhook'
+      preLoaderRoute: typeof ApiLemonWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/stripe/webhook': {
       id: '/api/stripe/webhook'
       path: '/api/stripe/webhook'
@@ -203,6 +223,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdhudWalletRoute: AdhudWalletRoute,
   CheckoutMockRoute: CheckoutMockRoute,
   MemberUsernameRoute: MemberUsernameRoute,
+  ApiLemonWebhookRoute: ApiLemonWebhookRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport

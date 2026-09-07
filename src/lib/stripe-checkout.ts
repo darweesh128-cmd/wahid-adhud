@@ -4,10 +4,12 @@ import {
   MEMBERSHIP_USD_CENTS,
   checkoutMode,
   hasStripeSecret,
+  isLemonSessionId,
   isMembershipCheckoutV2Enabled,
   isMockCheckoutEnabled,
   isMockSessionId,
   mockSessionId,
+  paymentIdFromLemonSession,
   paymentIdFromMockSession,
   resolveStripeSecretKey,
 } from "@/lib/membership";
@@ -53,7 +55,7 @@ export function stripeCheckoutConfigured(): boolean {
 
 export function checkoutAvailable(): boolean {
   const mode = checkoutMode();
-  return mode === "stripe" || mode === "mock";
+  return mode === "stripe" || mode === "mock" || mode === "lemon";
 }
 
 function appOrigin(requestOrigin?: string): string {
@@ -76,7 +78,7 @@ export type CreateAccountCheckoutInput = {
 };
 
 export type CreateCheckoutResult =
-  | { ok: true; url: string; sessionId: string; mode: "stripe" | "mock" }
+  | { ok: true; url: string; sessionId: string; mode: "stripe" | "mock" | "lemon" }
   | { ok: false; error: string };
 
 async function insertPendingPayment(input: CreateAccountCheckoutInput): Promise<number | null> {
@@ -131,6 +133,11 @@ export async function createMembershipCheckoutForAccount(
 
   const origin = appOrigin(input.origin);
   const mode = checkoutMode();
+
+  if (mode === "lemon") {
+    const { createLemonCheckoutForPayment } = await import("@/lib/lemon-checkout");
+    return createLemonCheckoutForPayment(input, paymentId, origin);
+  }
 
   if (mode === "mock") {
     const sessionId = mockSessionId(paymentId);
@@ -277,6 +284,12 @@ export async function completeCheckoutSession(sessionId: string, stamp: string):
   username?: string;
   error?: string;
 }> {
+  if (isLemonSessionId(sessionId)) {
+    const { completeLemonCheckoutSession } = await import("@/lib/lemon-checkout");
+    const result = await completeLemonCheckoutSession(sessionId, stamp);
+    return { ok: result.ok, status: result.status, username: result.username, error: result.error };
+  }
+
   if (isMockSessionId(sessionId)) {
     const paymentId = paymentIdFromMockSession(sessionId);
     if (!paymentId) return { ok: false, status: "missing", error: "Invalid mock session." };

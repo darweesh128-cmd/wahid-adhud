@@ -58,10 +58,40 @@ export function isMockCheckoutEnabled(): boolean {
   return !hasStripeSecret();
 }
 
-export type CheckoutMode = "stripe" | "mock" | "off";
+/** True when Lemon Squeezy API credentials are configured for live checkout. */
+export function hasLemonConfigured(): boolean {
+  const apiKey = process.env.LEMON_SQUEEZY_API_KEY?.trim();
+  const storeId = process.env.LEMON_SQUEEZY_STORE_ID?.trim();
+  const variantId = process.env.LEMON_SQUEEZY_VARIANT_ID?.trim();
+  return Boolean(apiKey && storeId && variantId);
+}
+
+/**
+ * Optional override: `lemon`, `stripe`, or `mock`.
+ * When unset, auto-selects lemon → stripe → mock.
+ */
+export function paymentProviderOverride(): "lemon" | "stripe" | "mock" | null {
+  const raw = process.env.PAYMENT_PROVIDER?.trim().toLowerCase();
+  if (raw === "lemon" || raw === "stripe" || raw === "mock") return raw;
+  return null;
+}
+
+export type CheckoutMode = "lemon" | "stripe" | "mock" | "off";
 
 export function checkoutMode(): CheckoutMode {
   if (!isMembershipCheckoutV2Enabled()) return "off";
+  const override = paymentProviderOverride();
+  if (override === "mock") return "mock";
+  if (override === "stripe") {
+    if (hasStripeSecret()) return "stripe";
+    if (isMockCheckoutEnabled()) return "mock";
+    return "off";
+  }
+  if (override === "lemon") {
+    if (hasLemonConfigured()) return "lemon";
+    return "off";
+  }
+  if (hasLemonConfigured()) return "lemon";
   if (hasStripeSecret() && !envTruthy("MEMBERSHIP_CHECKOUT_MOCK")) return "stripe";
   if (isMockCheckoutEnabled()) return "mock";
   return "off";
@@ -78,5 +108,21 @@ export function isMockSessionId(sessionId: string): boolean {
 export function paymentIdFromMockSession(sessionId: string): number | null {
   if (!isMockSessionId(sessionId)) return null;
   const id = Number(sessionId.slice("mock_cs_".length));
+  return Number.isFinite(id) && id > 0 ? id : null;
+}
+
+const LEMON_SESSION_PREFIX = "lemon_cs_";
+
+export function lemonSessionId(paymentId: number): string {
+  return `${LEMON_SESSION_PREFIX}${paymentId}`;
+}
+
+export function isLemonSessionId(sessionId: string): boolean {
+  return sessionId.startsWith(LEMON_SESSION_PREFIX);
+}
+
+export function paymentIdFromLemonSession(sessionId: string): number | null {
+  if (!isLemonSessionId(sessionId)) return null;
+  const id = Number(sessionId.slice(LEMON_SESSION_PREFIX.length));
   return Number.isFinite(id) && id > 0 ? id : null;
 }

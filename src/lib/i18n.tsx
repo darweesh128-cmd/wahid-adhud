@@ -300,7 +300,7 @@ const strings = {
     joinCtaCard: "Join · $1",
     joinUsdtCta: "Join · 5 USDT",
     orPayUsdt: "Or join with USDT",
-    cardCheckoutHint: "Card, Apple Pay, or Google Pay via Stripe Checkout.",
+    cardCheckoutHint: "Card, Apple Pay, or Google Pay via secure checkout.",
     checkoutRedirecting: "Redirecting to checkout…",
     checkoutFail: "Could not start checkout.",
     checkoutPending: "Confirming your payment…",

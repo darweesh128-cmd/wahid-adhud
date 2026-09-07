@@ -1,10 +1,10 @@
 # Membership checkout (v2)
 
-Wahid product: **$1 USD membership** via username-first account creation, then **Stripe Checkout (test mode)**. Legacy **5 USDT** join stays available until cutover.
+Wahid product: **$1 USD membership** via username-first account creation, then hosted checkout. Legacy **5 USDT** join stays available as secondary path.
 
-**Payment provider:** Stripe Checkout (preferred). Lemon Squeezy is not wired.
+**Live payment provider:** **Lemon Squeezy** (Mohamad cutover). Stripe Checkout remains as optional dev/test code path; Stripe live keys are **not required** for production.
 
-> **Note:** US company formation (e.g. separate Wyoming LLC workstream) is **not a dependency** for building, testing, or merging this product path. Ship the flagged v2 flow with test keys or the mock simulator now.
+> **Payout note:** Lemon Squeezy collects membership fees; Mohamad pays Lemon from crypto wallet later. No US entity or Stripe live keys needed for cutover.
 
 ## Feature flag
 
@@ -13,7 +13,7 @@ Wahid product: **$1 USD membership** via username-first account creation, then *
 | `VITE_MEMBERSHIP_CHECKOUT_V2=true` | Build / client | Shows Open account + $1 flow |
 | `MEMBERSHIP_CHECKOUT_V2=true` | Server | Enables account APIs, checkout, webhooks |
 
-**Default (flag off):** existing 5 USDT join only — production unchanged today.
+**Default:** v2 ON in production (PR #15). Set `=false` to opt out.
 
 ## Product flow (flag on)
 
@@ -22,40 +22,62 @@ Open account · $1
     → Pick unique username (+ suggest, availability check)
     → Create account & pay $1 (adhud_accounts row first, status=pending)
     → Checkout:
+         • Lemon Squeezy when LEMON_SQUEEZY_* env configured (live cutover)
          • Stripe Checkout TEST when STRIPE_SECRET_KEY=sk_test_...
-         • Mock simulator at /checkout/mock when no Stripe key
+         • Mock simulator at /checkout/mock when neither configured
     → Payment success (webhook or mock)
     → Membership active; ledger display_name=@username
     → Desk at /member/{username}
 ```
 
-## Checkout modes (build & test now)
+## Checkout modes
 
 | Mode | When | Notes |
 |------|------|--------|
-| **mock** | No `sk_test_...` (default in dev) | `/checkout/mock` — zero external setup |
-| **stripe** | `STRIPE_SECRET_KEY=sk_test_...` | Hosted Checkout **test mode** |
+| **lemon** | `LEMON_SQUEEZY_API_KEY` + store + variant IDs set | **Live cutover path** |
+| **mock** | No Lemon/Stripe keys (default in dev) | `/checkout/mock` — zero external setup |
+| **stripe** | `STRIPE_SECRET_KEY=sk_test_...` (no Lemon) | Hosted Checkout **test mode** |
 | **off** | Flag off | Legacy USDT only |
 
-Force mock with test keys set: `MEMBERSHIP_CHECKOUT_MOCK=true`
+Override auto-selection: `PAYMENT_PROVIDER=lemon|stripe|mock`
+
+Force mock with keys set: `MEMBERSHIP_CHECKOUT_MOCK=true`
 
 ## Environment variables (placeholders — no secrets in git)
 
-### Enable v2 (dev / staging / preview)
+### Enable v2
 
 ```
 VITE_MEMBERSHIP_CHECKOUT_V2=true
 MEMBERSHIP_CHECKOUT_V2=true
+BETTER_AUTH_URL=https://www.adhud.xyz
 ```
 
-### Stripe test mode (use now)
+### Lemon Squeezy (live cutover — preferred)
+
+```
+LEMON_SQUEEZY_API_KEY=...
+LEMON_SQUEEZY_STORE_ID=...
+LEMON_SQUEEZY_VARIANT_ID=...
+LEMON_SQUEEZY_WEBHOOK_SECRET=...
+LEMON_SQUEEZY_TEST_MODE=true          # optional; use test mode in Lemon dashboard
+PAYMENT_PROVIDER=lemon                  # optional; auto when Lemon keys present
+```
+
+Register webhook in Lemon dashboard:
+- URL: `POST https://www.adhud.xyz/api/lemon/webhook`
+- Event: `order_created`
+- Signing secret → `LEMON_SQUEEZY_WEBHOOK_SECRET`
+
+### Stripe test mode (optional dev path)
 
 ```
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 STRIPE_PRICE_ID=price_...              # optional; inline $1 price_data if omitted
-BETTER_AUTH_URL=https://www.adhud.xyz
 ```
+
+Stripe live (`sk_live_*`) is **not required** for Wahid cutover. `ALLOW_STRIPE_LIVE=true` gate remains for safety if ever needed.
 
 ### Optional
 
@@ -63,19 +85,6 @@ BETTER_AUTH_URL=https://www.adhud.xyz
 MEMBERSHIP_CHECKOUT_MOCK=true
 VITE_PUBLIC_HOSTNAME=www.adhud.xyz
 ```
-
-## TODO — production live keys (CEO request only, later)
-
-Do **not** add live keys in this PR. When the CEO requests go-live:
-
-- [ ] **TODO:** Obtain `sk_live_...` and live webhook secret from CEO / ops (not self-serve)
-- [ ] **TODO:** Confirm payout destination entity + bank are ready (separate from Wahid product work)
-- [ ] **TODO:** Set `ALLOW_STRIPE_LIVE=true` only after CEO sign-off
-- [ ] **TODO:** Point `STRIPE_SECRET_KEY` at live key in production env (never commit)
-- [ ] **TODO:** Register live webhook URL `POST /api/stripe/webhook` in Stripe dashboard
-- [ ] **TODO:** Decide USDT cutover — hide secondary panel when card path is primary
-
-Until then, the server **ignores `sk_live_*`** unless `ALLOW_STRIPE_LIVE=true` (safety gate).
 
 ## API surface
 
@@ -85,24 +94,32 @@ Until then, the server **ignores `sk_live_*`** unless `ALLOW_STRIPE_LIVE=true` (
 | `checkAdhudUsername` | Uniqueness check |
 | `createAdhudAccount` | Create account → checkout URL |
 | `payMockCheckout` | Complete mock payment |
-| `POST /api/stripe/webhook` | Stripe `checkout.session.completed` |
+| `POST /api/lemon/webhook` | Lemon `order_created` → membership |
+| `POST /api/stripe/webhook` | Stripe `checkout.session.completed` (optional) |
 | `GET /checkout/mock` | Payment simulator (no keys) |
 
 ## Database
 
 - `migrations/0008_membership_checkout.sql` — `membership_payments`
 - `migrations/0009_adhud_accounts.sql` — `adhud_accounts`, `donations.display_name`, `members.username`
+- `migrations/0010_lemon_checkout.sql` — `lemon_checkout_id`, `lemon_order_id`
 
 ## Test plan
 
-### Mock simulator (no Stripe account)
+### Mock simulator (no payment account)
 
 1. `VITE_MEMBERSHIP_CHECKOUT_V2=true` + `MEMBERSHIP_CHECKOUT_V2=true`
 2. **Open account · $1** → username → **Create account & pay $1**
 3. `/checkout/mock` → **Simulate successful payment**
 4. `@username` on ledger; `/member/{username}` desk
 
-### Stripe test mode
+### Lemon Squeezy (live)
+
+1. Set `LEMON_SQUEEZY_*` env vars in Vercel
+2. Register webhook `POST /api/lemon/webhook`
+3. Complete $1 checkout → membership activates via `order_created` webhook
+
+### Stripe test mode (optional)
 
 1. Stripe dashboard → **test mode** → copy `sk_test_...`
 2. `stripe listen --forward-to localhost:8080/api/stripe/webhook`
@@ -111,4 +128,4 @@ Until then, the server **ignores `sk_live_*`** unless `ALLOW_STRIPE_LIVE=true` (
 ### Legacy USDT
 
 - Flag **on:** collapsible **Or join with USDT**
-- Flag **off:** 5 USDT only (current production default)
+- Flag **off:** 5 USDT only

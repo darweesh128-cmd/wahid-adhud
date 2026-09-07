@@ -1,7 +1,7 @@
 # Wahid · The Adhud — Continuity (Cursor-ready)
 
 **Purpose:** Resume from Cursor or Grok Bot anytime. **No secrets in this file.**  
-**Last updated:** 2026-09-07 ~14:50 Asia/Riyadh (UTC+3)  
+**Last updated:** 2026-09-07 ~15:10 Asia/Riyadh (UTC+3)  
 **Scope lock:** `darweesh128-cmd/wahid-adhud` only — do not touch other projects.
 
 ## Snapshot (NOW)
@@ -10,17 +10,18 @@
 |------|--------|
 | Live site | **https://www.adhud.xyz** HTTP 200 · **English-only** (`lang=en`, Arabic toggle removed, `waahid-lang` purge) |
 | Apex | https://adhud.xyz → 308 → www |
-| Production join | **LIVE** — **Open account · $1** on https://www.adhud.xyz (HTTP 200, verified curl) |
-| SEO | Title/meta/og say **Open account · $1** (no 5 USDT lead) |
-| $1 live preview | **https://temporary-swift-redwood-bejsfjj.vercel.app** HTTP 200 · claim `87ef6955-ecfe-453b-a0fb-56935d640326` |
-| Checkout mode | **Mock/test** unless live `sk_live` + `ALLOW_STRIPE_LIVE=true` in Vercel env |
+| Production join | **LIVE** — **Open account · $1** on https://www.adhud.xyz |
+| SEO | Title/meta/og say **Open account · $1** (no 5 USDT lead) — PR #17 merged |
+| Live payment target | **Lemon Squeezy** collects $1 membership at cutover (not Stripe live keys) |
+| Payout ops | Mohamad pays Lemon from crypto wallet later; Stripe live **not required** for cutover |
+| Checkout mode | **Lemon** when `LEMON_SQUEEZY_*` env set; else **mock** `/checkout/mock`; Stripe test/mock remains as alternate code path |
 | Legacy USDT | **5 USDT TRC-20** collapsible **Or join with USDT** (House `TVmEo3Mn6dJfAWgk8KUF7rEvcdbdegmDER`) |
-| $1 membership | Code merged (PR #7); v2 default ON in code (PR #15); `vercel.json` + build script env |
+| $1 membership | Code merged (PR #7); v2 default ON (PR #15); Lemon webhook at `POST /api/lemon/webhook` |
 | Brand voice | Interconnection / brotherhood / family mutual solidarity / **trust first** — **never** money-collection or scam framing |
 | Audience | **Global except Arabic countries** · English-first |
 | X posting | Routine enabled for **@adudadid only** |
-| TikTok | Mid-signup via mail.tm (as of 2026-09-07 ~13:11 Asia/Riyadh) |
-| Reddit | Account creation attempt **in progress** (as of 2026-09-07 ~13:11 Asia/Riyadh) |
+| TikTok | Mid-signup via mail.tm |
+| Reddit | Account creation attempt **in progress** |
 
 ## Repo
 
@@ -28,25 +29,29 @@
 |------|--------|
 | GitHub | https://github.com/darweesh128-cmd/wahid-adhud |
 | Default branch | `main` |
-| Tip (at continuity write) | `0bf720c` — PR #15 merged; www v2 live |
+| Tip (at continuity write) | `5287a04` — PR #17 SEO merged; Lemon checkout PR pending |
 
 ### Merged PRs
-#15 v2 default ON · #14 preview URL · #13 build env · #12 vercel.json · #7 membership $1 · #6 English-only
+#17 SEO $1 meta · #15 v2 default ON · #14 preview URL · #13 build env · #12 vercel.json · #7 membership $1 · #6 English-only
 
 ## Feature flags (names only)
-- `MEMBERSHIP_CHECKOUT_V2` / `VITE_MEMBERSHIP_CHECKOUT_V2` — **default ON** in code; env opt-out with `false`
-- Stripe live (`sk_live_*`) — blocked until `ALLOW_STRIPE_LIVE=true` (CEO)
-- Stripe test (`sk_test_*`) — used if in Vercel env; else **mock** `/checkout/mock`
+- `MEMBERSHIP_CHECKOUT_V2` / `VITE_MEMBERSHIP_CHECKOUT_V2` — **default ON**; env opt-out with `false`
+- `PAYMENT_PROVIDER` — optional override: `lemon` \| `stripe` \| `mock` (auto: lemon → stripe → mock)
+- **Lemon Squeezy (live cutover):** `LEMON_SQUEEZY_API_KEY`, `LEMON_SQUEEZY_STORE_ID`, `LEMON_SQUEEZY_VARIANT_ID`, `LEMON_SQUEEZY_WEBHOOK_SECRET`, `LEMON_SQUEEZY_TEST_MODE`
+- **Stripe (optional / dev):** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID`, `ALLOW_STRIPE_LIVE` — not required for production cutover
+- `MEMBERSHIP_CHECKOUT_MOCK` — force mock simulator
 - `DATABASE_URL` — Neon `wahid-adhud` / `little-field-83907551`
 
 ## Live / deploy
-- Canonical https://www.adhud.xyz · Vercel Valid · **v2 UI live** (asset `index-BMyCKiwL.js`)
-- Deploy: git push `main` → Vercel production; code defaults v2 ON (PR #15)
+- Canonical https://www.adhud.xyz · Vercel Valid · **v2 UI live**
+- Deploy: git push `main` → Vercel production
+- Register Lemon webhook: `POST https://www.adhud.xyz/api/lemon/webhook` (event: `order_created`)
 - English-only via PR #6
 
 ## Join
-- Primary: **$1** Open account + username + mock/Stripe checkout
+- Primary: **$1** Open account + username + **Lemon Squeezy** checkout (live) or mock (dev)
 - Secondary: 5 USDT TRC-20 (House address preserved)
+- Stripe live keys **not required** — Mohamad funds Lemon payout from crypto wallet separately
 
 ## Social CRITICAL
 ### Allowed: X **@adudadid** only · https://www.adhud.xyz
@@ -56,13 +61,14 @@
 1. X @adudadid: Hotmail unlock in progress
 2. TikTok: mid-signup via mail.tm
 3. Reddit: account creation in progress
-4. Stripe live: mock until CEO `sk_live` + `ALLOW_STRIPE_LIVE=true`
+4. Lemon Squeezy: set Vercel env vars + register webhook for live $1 collection
 
 ## How to resume in Cursor
 1. Open `darweesh128-cmd/wahid-adhud` on `main`; read this file
 2. Verify www shows **Open account · $1**
-3. @adudadid only — never @Tarkou78 or Outlook
-4. No secrets in git/PRs/chat
+3. Live payments = **Lemon Squeezy** (not Stripe live)
+4. @adudadid only — never @Tarkou78 or Outlook
+5. No secrets in git/PRs/chat
 
 ## Continuity rule
-Update on live URL changes, flag cutovers, or TECH_BLOCKs.
+Update on live URL changes, payment provider cutovers, flag changes, or TECH_BLOCKs.
