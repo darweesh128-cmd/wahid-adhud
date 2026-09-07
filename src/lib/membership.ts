@@ -13,16 +13,18 @@ function envTruthy(key: string): boolean {
 
 /**
  * When true, show the $1 account + card checkout path alongside legacy 5 USDT.
- * Set `VITE_MEMBERSHIP_CHECKOUT_V2=true` in deploy env (and `.grok/app-env.json` for local builds).
+ * Default ON for production; set `VITE_MEMBERSHIP_CHECKOUT_V2=false` to disable.
  */
 export const membershipCheckoutV2 =
-  import.meta.env.VITE_MEMBERSHIP_CHECKOUT_V2 === "true";
+  import.meta.env.VITE_MEMBERSHIP_CHECKOUT_V2 !== "false";
 
-/** Server-side mirror of the v2 checkout flag. */
+/** Server-side mirror of the v2 checkout flag. Default ON unless explicitly false. */
 export function isMembershipCheckoutV2Enabled(): boolean {
   const raw =
     process.env.MEMBERSHIP_CHECKOUT_V2 ?? process.env.VITE_MEMBERSHIP_CHECKOUT_V2 ?? "";
-  return raw === "true";
+  if (raw === "false") return false;
+  if (raw === "true") return true;
+  return true;
 }
 
 /**
