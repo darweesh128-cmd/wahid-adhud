@@ -136,7 +136,7 @@ async function createSubyV2Payment(
     productId,
     externalRef: String(input.paymentId),
     metadata: membershipMetadata(input),
-    successUrl: `${input.origin}/?checkout=success&session_id={PAYMENT_ID}`,
+    successUrl: `${input.origin}/?checkout=success`,
     cancelUrl: `${input.origin}/?checkout=cancelled#join`,
   });
   if (!created.ok) return created;
