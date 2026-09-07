@@ -155,7 +155,7 @@ export function JoinAccountPanel({ country, onCountryChange, onJoined }: JoinAcc
 
       <Button type="button" size="lg" className="w-full" disabled={!canSubmit} onClick={() => createMutation.mutate()}>
         <UserRound className="size-4" />
-        {createMutation.isPending ? t("creatingAccount") : t("createAccountCta")}
+        {createMutation.isPending ? t("creatingAccount") : t("continueToPay")}
       </Button>
       <p className="text-center text-xs text-fg-muted">{t("cardCheckoutHint")}</p>
     </div>
