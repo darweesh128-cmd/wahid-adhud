@@ -474,7 +474,7 @@ export const SHARE_COPY = {
   ar: `قد تكون بخير اليوم.
 غيرك ليس كذلك.
 
-ادفع 5 USDT على TRC-20.
+افتح حسابك — عضوية $1.
 تصبح عضيداً.
 
 لا تدخل لتأخذ.
@@ -484,7 +484,7 @@ export const SHARE_COPY = {
   en: `You may be fine today.
 Someone else is not.
 
-Pay 5 USDT on TRC-20.
+Open your account — $1 membership.
 Become ʿAḍīd.
 
 Do not join to take.

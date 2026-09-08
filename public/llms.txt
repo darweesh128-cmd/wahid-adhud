@@ -1,0 +1,28 @@
+# Wahid · The ʿAḍud — www.adhud.xyz
+
+> Mutual solidarity network. Open your account with a **$1 USD membership** (card checkout). English-first, global audience. Trust and interconnection — not fundraising.
+
+## Live site
+- https://www.adhud.xyz
+- https://www.adhud.xyz/network — member map
+
+## Join (primary)
+1. Pick a unique username
+2. Pay **$1 USD** via card checkout (Suby)
+3. Get your member desk at `/member/{username}`
+
+## Join (legacy)
+- **5 USDT** on TRC-20 to House wallet (collapsible on site)
+
+## Brand voice
+- Brotherhood, family mutual solidarity, trust first
+- Never scam or money-collection framing
+- "Do not join to take. Join because you are someone's arm."
+
+## Social
+- X: @adudadid (English-first)
+- Share copy built into the site (WhatsApp + X intent links)
+
+## Tech
+- TanStack Start, React 19, Vercel, Neon Postgres
+- Repo: https://github.com/darweesh128-cmd/wahid-adhud

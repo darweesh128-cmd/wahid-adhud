@@ -13,7 +13,16 @@ export const Route = createFileRoute("/robots.txt")({
     handlers: {
       GET: ({ request }) => {
         const origin = siteOrigin(request);
-        const body = ["User-agent: *", "Allow: /", "", `Sitemap: ${origin}/sitemap.xml`, ""].join("\n");
+        const body = [
+          "User-agent: *",
+          "Allow: /",
+          "",
+          `Sitemap: ${origin}/sitemap.xml`,
+          "",
+          "# LLM / agent context",
+          `See: ${origin}/llms.txt`,
+          "",
+        ].join("\n");
         return new Response(body, {
           headers: { "Content-Type": "text/plain; charset=utf-8" },
         });

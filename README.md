@@ -1,36 +1,37 @@
-# Wahid · The Adhud
+# Wahid · The ʿAḍud
 
-Wallet-level mutual aid. No account. No KYC. Five USDT on TRC-20.
+**Open your account — $1 membership.** Mutual solidarity and trust, not fundraising.
 
-You may be fine today. Someone else is not.
+Live: **https://www.adhud.xyz**
 
 **Cursor / Cloud Agent:** See [CONTINUITY.md](./CONTINUITY.md) for session resume context (no secrets).
 
-## The example
+## What it is
 
-The House page shows **the total** and **the gifts moving**.
+You may be fine today. Someone else is not.
 
-- Center of the graph is the running USDT total this round.
-- Each pulse is **5 USDT** leaving an Adhud toward the House.
-- Clusters are the countries members can serve from.
-- Target: **1,000,000 USDT**. At one million, aid lands with one Adhud.
+The ʿAḍud is a wallet-level mutual-aid circle: members open an account, join for **$1 USD**, and stand as someone's arm. English-first, global (except Arabic countries in positioning).
 
 ## Join
 
-1. Open your exchange (Binance, etc.) and choose **Withdraw USDT**.
-2. Select network **TRC-20 (Tron)** and send **5 USDT** to the House address below.
-3. Enter your payout wallet and the country you can serve from on the site.
-4. You are an Adhud. Your desk is your wallet.
+**Primary ($1 card):**
 
-**Warning:** wrong network = lost funds. Send exactly **5 USDT** on **TRC-20**.
+1. Open **https://www.adhud.xyz**
+2. Choose a unique username
+3. Pay **$1** at checkout (card / Apple Pay / Google Pay when live)
+4. Your desk: `https://www.adhud.xyz/member/{username}`
+
+**Legacy (5 USDT TRC-20):** collapsible **Or join with USDT** on the site.
 
 House TRC-20: `TVmEo3Mn6dJfAWgk8KUF7rEvcdbdegmDER`
 
+## Spread
+
+Built-in share flow: WhatsApp + X intent links with copy tuned for @adudadid. See [docs/PROMOTION.md](./docs/PROMOTION.md) for a posting queue.
+
 ## Stack
 
-TanStack Start, React 19, Tailwind v4, Postgres (Neon in production, PGLite in preview).
-
-Auth is off. Identity is the wallet. Rows are unowned.
+TanStack Start, React 19, Tailwind v4, Postgres (Neon in production, PGLite in preview). Payments: Suby v2 (live target).
 
 ## Run
 
