@@ -19,6 +19,7 @@ import {
   type NetworkSnapshot,
   type PoolSnapshot,
 } from "@/lib/pool";
+import { loadMembershipPaymentSessionById } from "@/lib/membership-fulfill";
 import {
   completeCheckoutSession,
 } from "@/lib/stripe-checkout";
@@ -220,16 +221,52 @@ export type CheckoutStatusResult =
   | { ok: true; status: "pending" }
   | { ok: false; error: string };
 
+function parseCheckoutPaymentId(value: unknown): number | undefined {
+  if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+    return Math.round(value);
+  }
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number(value.trim());
+    if (Number.isFinite(parsed) && parsed > 0) return Math.round(parsed);
+  }
+  return undefined;
+}
+
 export const getMembershipCheckoutStatus = createServerFn({ method: "GET" })
   .validator((data: unknown) => {
     if (data == null || typeof data !== "object") throw new Error("Invalid data");
-    const sessionId = "sessionId" in data ? data.sessionId : undefined;
-    if (typeof sessionId !== "string" || !sessionId.trim()) throw new Error("Missing session id");
-    return { sessionId: sessionId.trim().slice(0, 256) };
+    const sessionId =
+      "sessionId" in data && typeof data.sessionId === "string" && data.sessionId.trim()
+        ? data.sessionId.trim().slice(0, 256)
+        : undefined;
+    const paymentId = parseCheckoutPaymentId("paymentId" in data ? data.paymentId : undefined);
+    if (!sessionId && !paymentId) throw new Error("Missing session id or payment id");
+    return { sessionId, paymentId };
   })
   .handler(async ({ data }): Promise<CheckoutStatusResult> => {
+    let sessionId = data.sessionId;
+    if (!sessionId && data.paymentId) {
+      const payment = await loadMembershipPaymentSessionById(data.paymentId);
+      if (!payment) return { ok: false, error: "Checkout session not found." };
+      if (payment.status === "completed" && payment.donation_id && payment.username) {
+        const sql = await getSql();
+        const rows = await sql<{ id: number }>`
+          select id from adhud_accounts where lower(username) = ${payment.username!.toLowerCase()} limit 1
+        `;
+        const accountId = rows[0]?.id;
+        const wallet = accountId ? accountDeskWallet(accountId) : undefined;
+        return {
+          ok: true,
+          status: "completed",
+          username: payment.username,
+          snapshot: await loadSnapshot(wallet),
+        };
+      }
+      sessionId = payment.stripe_session_id?.trim() || undefined;
+      if (!sessionId) return { ok: true, status: "pending" };
+    }
     const stamp = await clientStamp();
-    const result = await completeCheckoutSession(data.sessionId, stamp);
+    const result = await completeCheckoutSession(sessionId, stamp);
     if (result.status === "completed" && result.username) {
       const sql = await getSql();
       const rows = await sql<{ id: number }>`

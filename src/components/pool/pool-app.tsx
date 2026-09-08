@@ -71,6 +71,7 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
     const params = new URLSearchParams(window.location.search);
     const checkout = params.get("checkout");
     let sessionId = params.get("session_id");
+    const paymentIdParam = params.get("pid");
     if (!sessionId) {
       try {
         sessionId = localStorage.getItem(CHECKOUT_SESSION_STORAGE_KEY);
@@ -83,13 +84,16 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
       window.history.replaceState({}, "", `${window.location.pathname}#join`);
       return;
     }
-    if (checkout !== "success" || !sessionId) return;
+    if (checkout !== "success" || (!sessionId && !paymentIdParam)) return;
 
     void (async () => {
       const pendingToast = toast.loading(t("checkoutPending"));
+      const statusPayload = sessionId
+        ? { sessionId }
+        : { paymentId: Number(paymentIdParam) };
       try {
         for (let attempt = 0; attempt < 12; attempt += 1) {
-          const result = await getMembershipCheckoutStatus({ data: { sessionId } });
+          const result = await getMembershipCheckoutStatus({ data: statusPayload });
           if (!result.ok) {
             toast.error(result.error, { id: pendingToast });
             return;

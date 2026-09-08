@@ -99,7 +99,7 @@ async function createSubyV3CheckoutSession(
   const productId = resolveSubyProductId();
   const body: Record<string, unknown> = {
     mode: "payment",
-    successUrl: `${input.origin}/?checkout=success`,
+    successUrl: `${input.origin}/?checkout=success&pid=${input.paymentId}`,
     cancelUrl: `${input.origin}/?checkout=cancelled#join`,
     metadata: membershipMetadata(input),
     displayName: `Wahid · ʿAḍīd membership (@${input.username})`,
@@ -136,7 +136,7 @@ async function createSubyV2Payment(
     productId: product.productId,
     externalRef: String(input.paymentId),
     metadata: membershipMetadata(input),
-    successUrl: `${input.origin}/?checkout=success`,
+    successUrl: `${input.origin}/?checkout=success&pid=${input.paymentId}`,
     cancelUrl: `${input.origin}/?checkout=cancelled#join`,
     // Best-effort on v2 payment/create (product.paymentMethods is authoritative; see Suby OpenAPI).
     paymentMethods,
