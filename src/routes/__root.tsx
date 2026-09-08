@@ -7,9 +7,19 @@ import { I18nProvider, LANG_BOOTSTRAP_SCRIPT } from "@/lib/i18n";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import appCss from "../styles.css?url";
 
+const SITE_URL = "https://www.adhud.xyz";
 const APP_NAME = "Wahid · The ʿAḍud";
 const APP_DESCRIPTION_EN =
   "Open your account with Wahid · The ʿAḍud — a $1 membership built on mutual solidarity and trust. Join ʿAḍīd who stand as someone's arm.";
+
+const JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: APP_NAME,
+  url: SITE_URL,
+  description: APP_DESCRIPTION_EN,
+  inLanguage: "en",
+};
 
 export const Route = createRootRoute({
   head: () => ({
@@ -22,12 +32,16 @@ export const Route = createRootRoute({
       { property: "og:title", content: `${APP_NAME} · Open account` },
       { property: "og:description", content: APP_DESCRIPTION_EN },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: SITE_URL },
+      { property: "og:site_name", content: APP_NAME },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@adudadid" },
       { name: "twitter:title", content: `${APP_NAME} · $1 mutual solidarity` },
       { name: "twitter:description", content: APP_DESCRIPTION_EN },
       { name: "keywords", content: "Wahid, Adhud, Open account, $1 membership, mutual solidarity, mutual aid, trust, ʿAḍud" },
     ],
     links: [
+      { rel: "canonical", href: SITE_URL },
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/__grok/manifest.webmanifest" },
@@ -60,6 +74,10 @@ function RootDocument() {
     <html lang="en" dir="ltr" className="antialiased" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: LANG_BOOTSTRAP_SCRIPT }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+        />
         <HeadContent />
       </head>
       <body className="bg-bg text-fg">

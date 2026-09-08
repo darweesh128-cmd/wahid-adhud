@@ -240,12 +240,17 @@ const strings = {
     invite: "Invite",
     round: "Round",
     storyKicker: "Wallet-level · no account · USDT",
+    storyKickerV2: "Open account · $1 membership",
     storyH1a: "You may be fine today.",
     storyH1b: "Someone else is not.",
     storyP1:
       "This is not a lottery. This is a family. The ʿAḍud. Five USDT on TRC-20, and you become ʿAḍīd. Do not join to take. Join because you are someone's arm.",
+    storyP1V2:
+      "This is not a lottery. This is a family. The ʿAḍud. Open your account — $1 membership — and you become ʿAḍīd. Do not join to take. Join because you are someone's arm.",
     storyP2:
       "No state. No bank. No account. No name but your wallet. Money, service, force, influence. Every million reaches one of us. Every ʿAḍīd is a publisher.",
+    storyP2V2:
+      "No KYC. Pick a username. Money, service, force, influence. Every million reaches one of us. Every ʿAḍīd is a publisher.",
     storyEtymWord1: "ʿAḍud",
     storyEtym1: "The upper arm. Strength. The one who backs you.",
     storyEtymWord2: "ʿAḍīd",
@@ -277,6 +282,7 @@ const strings = {
     yourGift: "Your gift this round",
     openDesk: "Open my desk",
     point1: "No account. Every payer is ʿAḍīd. The wallet is the name.",
+    point1V2: "Pick a username. Every member is ʿAḍīd. Your desk is your name.",
     point2: "Do not join to take. Join because you are someone's arm.",
     point3: "Money, service, force, influence. Every million aids one of us.",
     newAdhuds: "New ʿAḍīd",
@@ -285,6 +291,7 @@ const strings = {
     howTitle: "How the House works",
     step1t: "Become ʿAḍīd",
     step1: "Send 5 USDT on TRC-20, register your wallet and the country you can serve.",
+    step1V2: "Pick a username and pay $1 (card / Apple Pay / Google Pay).",
     step2t: "The arm strengthens",
     step2: "Target: 1,000,000 USDT. Every gift shows on the ledger and the network.",
     step3t: "Aid reaches an ʿAḍīd",
@@ -294,6 +301,8 @@ const strings = {
     copyAddress: "Copy address",
     footerLead: "We are the arm. Every payer is ʿAḍīd.",
     footerBody: "No state. No bank. No account. USDT transfers are final. Each gift is an arm. Each million is aid.",
+    footerBodyV2:
+      "Mutual solidarity and trust first. $1 membership opens your desk. Each gift is an arm. Each million is aid.",
     toastJoined: "You are ʿAḍīd. Send this to three people.",
     toastMillion: "The million landed. Aid reached an ʿAḍīd.",
     toastJoinFail: "Could not join. Try again.",
@@ -474,7 +483,7 @@ export const SHARE_COPY = {
   ar: `قد تكون بخير اليوم.
 غيرك ليس كذلك.
 
-ادفع 5 USDT على TRC-20.
+افتح حسابك — عضوية $1.
 تصبح عضيداً.
 
 لا تدخل لتأخذ.
@@ -484,7 +493,7 @@ export const SHARE_COPY = {
   en: `You may be fine today.
 Someone else is not.
 
-Pay 5 USDT on TRC-20.
+Open your account — $1 membership.
 Become ʿAḍīd.
 
 Do not join to take.
