@@ -14,7 +14,7 @@
 | Checkout smoke | **Verified** — create account → redirect to **checkout.suby.fi** (stopped before card) |
 | SEO | Title/meta/og say **Open account · $1** (no 5 USDT lead) |
 | Checkout mode | **Suby v2** — code forces `SUBY_PAYMENT_METHODS=CARD` (PR #26 merged). **Vercel vault keys still point at orphaned uberip merchant** until darweesh128 account product + keys are rotated |
-| Suby merchant (target) | **darweesh128@gmail.com** · workspace **The Adhud** — logged in; webhook URL **saved** (`https://www.adhud.xyz/api/suby/webhook`); Solana payout wallet set |
+| Suby merchant (target) | **darweesh128@gmail.com** · workspace **The Adhud** — **logged in** (manual); API & Webhooks page shows keys + webhook URL `https://www.adhud.xyz/api/suby/webhook` |
 | Suby CARD gate | **Under review (~48h)** — dashboard banner; **CARD product publish blocked** until Suby approves card payments |
 | Suby product | **Not created** on darweesh128 account (UI form flaky; use API `scripts/suby-ensure-card-product.mjs` after CARD approval). Legacy `pro_j2b6qq84weq359rt3of1fl4p` belongs to old uberip inbox account |
 | Legacy USDT | **5 USDT TRC-20** collapsible **Or join with USDT** (House `TVmEo3Mn6dJfAWgk8KUF7rEvcdbdegmDER`) |
@@ -57,7 +57,9 @@
 **Vault only (names):** `SUBY_API_KEY`, `SUBY_WEBHOOK_SECRET`, optional `DATABASE_URL` — **rotate to darweesh128 Suby account** after CARD approval + product create (do not reuse uberip merchant keys)
 
 ## Suby ops checklist (darweesh128@gmail.com)
-- [x] Login + webhook URL saved
+- [x] Login (manual + verified 2026-09-08)
+- [x] Webhook URL active: `https://www.adhud.xyz/api/suby/webhook`
+- [ ] **Vercel vault:** rotate `SUBY_API_KEY` + `SUBY_WEBHOOK_SECRET` to darweesh128 account (agent has no Vercel MCP access)
 - [x] Solana payout wallet configured
 - [ ] Suby CARD merchant verification approved
 - [ ] Create CARD-only $1 product (`pro_…`) via API or dashboard

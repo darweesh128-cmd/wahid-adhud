@@ -1,18 +1,3 @@
-node_modules
-.vercel
-.output
-dist
-.nitro
-.tanstack
-.grok
-*.log
-.DS_Store
-.env
-.env.*
-!.env.example
-screenshots
-artifacts
-attachments
-AGENTS.md
-.project_id
-.node_modules.lock
+# Local ops reports may contain secrets — never commit
+SUBY_LOGIN_REPORT.md
+/tmp/suby-setup-report.json
