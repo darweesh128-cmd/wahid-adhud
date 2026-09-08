@@ -7,7 +7,7 @@ import {
   resolveSubyApiKey,
   resolveSubyProductId,
 } from "@/lib/membership";
-import { fulfillAccountPayment } from "@/lib/membership-fulfill";
+import { fulfillAccountPayment, loadMembershipPaymentSessionById } from "@/lib/membership-fulfill";
 import { resolveSubyApiVersion, resolveSubyMembershipProductId, resolveSubyPaymentMethods, resolveSubyPriceCents, subyRequest } from "@/lib/suby-api";
 import { verifySubyWebhookSignature as verifySignature } from "@/lib/suby-webhook-verify";
 
@@ -200,15 +200,68 @@ function subyPaymentLooksPaid(status: string): boolean {
   return SUBY_PAID_STATUSES.has(normalized) || normalized.includes("SUCCESS");
 }
 
+function subyExternalSessionIdFromWebhook(event: SubyWebhookPayload): string | null {
+  const topLevel = typeof event.data.id === "string" ? event.data.id.trim() : "";
+  if (topLevel) return topLevel;
+  const nested = event.data.payment?.id;
+  if (typeof nested === "string" && nested.trim()) return nested.trim();
+  return null;
+}
+
+async function resolveSubyCheckoutSessionFromWebhook(
+  event: SubyWebhookPayload,
+): Promise<string | null> {
+  const fromEvent = subyExternalSessionIdFromWebhook(event);
+  if (fromEvent && isSubySessionId(fromEvent)) return fromEvent;
+
+  const internalPaymentId = paymentIdFromSubyWebhook(event);
+  if (!internalPaymentId) return fromEvent || null;
+
+  const payment = await loadMembershipPaymentSessionById(internalPaymentId);
+  const stored = payment?.stripe_session_id?.trim();
+  if (stored && isSubySessionId(stored)) return stored;
+  return fromEvent || null;
+}
+
+export async function reconcilePendingSubyPayments(stamp: string, limit = 8): Promise<number> {
+  if (!isMembershipCheckoutV2Enabled() || checkoutMode() !== "suby" || !resolveSubyApiKey()) {
+    return 0;
+  }
+
+  const sql = await getSql();
+  const rows = await sql<{ stripe_session_id: string }>`
+    select stripe_session_id
+    from membership_payments
+    where status = 'pending'
+      and stripe_session_id is not null
+    order by id desc
+    limit ${limit}
+  `;
+
+  let fulfilled = 0;
+  for (const row of rows) {
+    const sessionId = row.stripe_session_id?.trim();
+    if (!sessionId || !isSubySessionId(sessionId)) continue;
+    const result = await completeSubyCheckoutSession(sessionId, stamp);
+    if (result.ok) fulfilled += 1;
+  }
+  return fulfilled;
+}
+
 export async function handleSubyWebhook(
   rawBody: string,
   headers: { signature: string | null; timestamp: string | null; event: string | null },
 ): Promise<Response> {
-  if (!subyWebhookSecret()) {
+  const webhookSecret = subyWebhookSecret();
+  const apiKey = resolveSubyApiKey();
+  if (!webhookSecret && !apiKey) {
     return new Response("Suby webhook not configured", { status: 503 });
   }
-  if (!verifySubyWebhookSignature(rawBody, headers.signature, headers.timestamp)) {
-    return new Response("Invalid signature", { status: 400 });
+
+  if (webhookSecret) {
+    if (!verifySubyWebhookSignature(rawBody, headers.signature, headers.timestamp)) {
+      return new Response("Invalid signature", { status: 400 });
+    }
   }
 
   let event: SubyWebhookPayload;
@@ -230,6 +283,23 @@ export async function handleSubyWebhook(
   if (!paymentId) {
     console.error("[suby] webhook missing payment id:", event.id, eventType);
     return new Response("Missing payment reference", { status: 400 });
+  }
+
+  if (!webhookSecret) {
+    const sessionId = await resolveSubyCheckoutSessionFromWebhook(event);
+    if (!sessionId) {
+      return new Response("Missing Suby session reference", { status: 400 });
+    }
+    const verified = await completeSubyCheckoutSession(sessionId, "suby-webhook-api");
+    if (!verified.ok) {
+      console.error("[suby] api-verified webhook failed:", verified.error);
+      const status = verified.error === "Payment is not completed yet." ? 409 : 500;
+      return new Response(verified.error ?? "Fulfillment failed", { status });
+    }
+    return new Response(JSON.stringify({ received: true, verified: "api" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   const externalPaymentId =

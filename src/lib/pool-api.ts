@@ -20,6 +20,7 @@ import {
   type PoolSnapshot,
 } from "@/lib/pool";
 import { loadMembershipPaymentSessionById } from "@/lib/membership-fulfill";
+import { reconcilePendingSubyPayments } from "@/lib/suby-checkout";
 import {
   completeCheckoutSession,
 } from "@/lib/stripe-checkout";
@@ -104,7 +105,13 @@ export const getPool = createServerFn({ method: "GET" })
     if (typeof wallet !== "string") throw new Error("Invalid wallet");
     return { wallet: wallet.trim().slice(0, 128) };
   })
-  .handler(async ({ data }) => loadSnapshot(data.wallet));
+  .handler(async ({ data }) => {
+    const stamp = await clientStamp();
+    void reconcilePendingSubyPayments(stamp).catch((err) => {
+      console.error("[suby] pending reconcile failed:", err);
+    });
+    return loadSnapshot(data.wallet);
+  });
 
 export type ContributeResult =
   | { ok: true; settled: false; snapshot: PoolSnapshot }
