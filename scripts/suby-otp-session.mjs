@@ -54,6 +54,9 @@ async function afterLogin(page, report) {
   }
   await page.goto("https://app.suby.fi/settings/webhooks", { waitUntil: "networkidle", timeout: 60000 });
   report.webhookOk = (await page.locator("body").innerText()).includes("adhud.xyz/api/suby/webhook");
+  await page.goto("https://app.suby.fi/products", { waitUntil: "networkidle", timeout: 60000 });
+  const pro = (await page.locator("body").innerText()).match(/pro_[a-z0-9]+/i);
+  report.productId = pro?.[0] ?? report.createProduct?.id ?? null;
 }
 
 if (SEND) {
@@ -62,18 +65,24 @@ if (SEND) {
     channel: "chrome",
     args: ["--no-sandbox", "--disable-dev-shm-usage"],
   });
-  await writeFile(WS_FILE, server.wsEndpoint().replace("[::1]", "127.0.0.1"));
-  const browser = await chromium.connect(server.wsEndpoint());
+  const wsEndpoint = server.wsEndpoint().replace("[::1]", "127.0.0.1");
+  await writeFile(WS_FILE, wsEndpoint);
+  const browser = await chromium.connect(wsEndpoint);
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   await page.goto("https://app.suby.fi/signin", { waitUntil: "networkidle" });
   await fillEmail(page);
   await page.getByRole("button", { name: /^send code$/i }).click();
   await page.waitForTimeout(3000);
-  const report = { action: "code_sent", ws: true, otpReady: /enter verification code/i.test(await page.locator("body").innerText()) };
+  const report = {
+    action: "code_sent",
+    ws: wsEndpoint,
+    otpReady: /enter verification code/i.test(await page.locator("body").innerText()),
+  };
   await writeFile(REPORT, JSON.stringify(report));
   console.log(JSON.stringify(report));
-  // Keep browser server alive for verify step (15 min)
-  await new Promise((r) => setTimeout(r, 15 * 60 * 1000));
+  // Hold server + browser open 20 min for verify (do not disconnect client)
+  await new Promise((r) => setTimeout(r, 20 * 60 * 1000));
+  await browser.close();
   await server.close();
   process.exit(0);
 }
@@ -83,24 +92,34 @@ if (!CODE) {
   process.exit(2);
 }
 
-const ws = (await readFile(WS_FILE, "utf8").catch(() => "")).trim().replace("[::1]", "127.0.0.1");
+const ws = (await readFile(WS_FILE, "utf8").catch(() => "")).trim();
 if (!ws) {
   console.log(JSON.stringify({ error: "no_browser_session", hint: "Run SUBY_SEND_CODE=1 first" }));
   process.exit(3);
 }
 
 const browser = await chromium.connect(ws);
-const page = browser.contexts()[0]?.pages()[0] || (await browser.newPage());
+const page = browser.contexts().flatMap((c) => c.pages())[0];
 const report = {};
 
-if (!/enter verification code/i.test(await page.locator("body").innerText())) {
-  console.log(JSON.stringify({ error: "otp_screen_lost" }));
+if (!page) {
+  console.log(JSON.stringify({ error: "no_page" }));
+  process.exit(5);
+}
+
+const bodyText = await page.locator("body").innerText();
+if (!/enter verification code/i.test(bodyText)) {
+  console.log(JSON.stringify({
+    error: "otp_screen_lost",
+    url: page.url(),
+    snippet: bodyText.replace(/\s+/g, " ").slice(0, 200),
+  }));
   process.exit(4);
 }
 
 await enterOtp(page, CODE);
 await page.getByRole("button", { name: /^verify$/i }).click();
-await page.waitForTimeout(6000);
+await page.waitForTimeout(7000);
 report.loggedIn = !page.url().includes("signin");
 if (!report.loggedIn) {
   report.error = "code_rejected";
@@ -112,4 +131,4 @@ report.url = page.url();
 await afterLogin(page, report);
 await writeFile(REPORT, JSON.stringify(report, null, 2));
 console.log(JSON.stringify(report));
-await browser.close();
+process.exit(0);
