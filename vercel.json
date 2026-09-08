@@ -15,6 +15,7 @@
     "MEMBERSHIP_CHECKOUT_V2": "true",
     "MEMBERSHIP_PROVIDER": "suby",
     "SUBY_PRODUCT_ID": "pro_j2b6qq84weq359rt3of1fl4p",
+    "SUBY_PAYMENT_METHODS": "CARD",
     "SUBY_API_VERSION": "v2",
     "SUBY_PRICE_CENTS": "100"
   }
