@@ -8,7 +8,7 @@ import {
   resolveSubyProductId,
 } from "@/lib/membership";
 import { fulfillAccountPayment } from "@/lib/membership-fulfill";
-import { resolveSubyApiVersion, resolveSubyPriceCents, subyRequest } from "@/lib/suby-api";
+import { resolveSubyApiVersion, resolveSubyMembershipProductId, resolveSubyPaymentMethods, resolveSubyPriceCents, subyRequest } from "@/lib/suby-api";
 import { verifySubyWebhookSignature as verifySignature } from "@/lib/suby-webhook-verify";
 
 type SubyV2CreatePaymentData = {
@@ -103,6 +103,7 @@ async function createSubyV3CheckoutSession(
     cancelUrl: `${input.origin}/?checkout=cancelled#join`,
     metadata: membershipMetadata(input),
     displayName: `Wahid · ʿAḍīd membership (@${input.username})`,
+    paymentMethods: resolveSubyPaymentMethods(),
   };
 
   if (productId) {
@@ -127,18 +128,26 @@ async function createSubyV2Payment(
   input: CreateSubyCheckoutInput,
   apiKey: string,
 ): Promise<{ ok: true; url: string; sessionId: string } | { ok: false; error: string }> {
-  const productId = resolveSubyProductId();
-  if (!productId) {
-    return { ok: false, error: "Suby v2 requires SUBY_PRODUCT_ID (or set SUBY_API_VERSION=v3 for ad-hoc price)." };
-  }
+  const product = await resolveSubyMembershipProductId(apiKey, resolveSubyProductId());
+  if (!product.ok) return product;
 
-  const created = await subyRequest<SubyV2CreatePaymentData>("POST", "/api/payment/create", apiKey, {
-    productId,
+  const paymentMethods = resolveSubyPaymentMethods();
+  const body: Record<string, unknown> = {
+    productId: product.productId,
     externalRef: String(input.paymentId),
     metadata: membershipMetadata(input),
     successUrl: `${input.origin}/?checkout=success`,
     cancelUrl: `${input.origin}/?checkout=cancelled#join`,
-  });
+    // Best-effort on v2 payment/create (product.paymentMethods is authoritative; see Suby OpenAPI).
+    paymentMethods,
+  };
+
+  if (product.isCustomPrice) {
+    body.priceCents = String(resolveSubyPriceCents());
+    body.currency = "USD";
+  }
+
+  const created = await subyRequest<SubyV2CreatePaymentData>("POST", "/api/payment/create", apiKey, body);
   if (!created.ok) return created;
 
   const sessionId = created.data.paymentId;

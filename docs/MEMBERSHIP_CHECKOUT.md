@@ -63,6 +63,8 @@ MEMBERSHIP_PROVIDER=suby
 SUBY_API_KEY=                          # sk_live_… or sk_sandbox_…
 SUBY_WEBHOOK_SECRET=                     # whsec_… from dashboard
 SUBY_PRODUCT_ID=                         # pro_… one-time $1 product (optional on v3)
+SUBY_CARD_PRODUCT_ID=                    # optional override: CARD-only product (paymentMethods: ["CARD"])
+SUBY_PAYMENT_METHODS=CARD                # default CARD — card / Apple Pay / Google Pay; not crypto QR
 SUBY_PRICE_CENTS=100                     # optional ad-hoc price if no product (v3 default: 100)
 SUBY_API_VERSION=v2                      # optional; default v2 (production). Set v3 for beta /api.beta.suby.fi
 SUBY_API_BASE_URL=https://api.suby.fi    # optional; v2 default (production)
@@ -98,6 +100,7 @@ Complete in [Suby dashboard](https://app.suby.fi) — **production live as of 20
 - [x] Create merchant account (Suby SAS MoR — no US entity required)
 - [x] **Card Request:** submit proof of business for card acceptance approval
 - [x] Create **one-time** product: **$1.00 USD** — `SUBY_PRODUCT_ID=pro_j2b6qq84weq359rt3of1fl4p`
+- [ ] **Product paymentMethods must be `["CARD"]` only** (not CRYPTO / not CRYPTO-first). Suby v2 binds methods to the product; hosted checkout shows crypto QR when the product allows CRYPTO. Wahid code defaults `SUBY_PAYMENT_METHODS=CARD`, verifies the product via API, and auto-provisions a CARD-only custom-price product if the configured id is crypto-only.
 - [x] Configure **USDC wallet payout**
 - [x] `SUBY_API_KEY` in Vercel vault (never commit)
 - [x] Webhook URL: `POST https://www.adhud.xyz/api/suby/webhook`
@@ -110,6 +113,7 @@ Complete in [Suby dashboard](https://app.suby.fi) — **production live as of 20
 | Integration | Endpoint | Base URL |
 |-------------|----------|----------|
 | **v2 payment (production default)** | `POST /api/payment/create` | `https://api.suby.fi` |
+| Payment methods | `paymentMethods` on **product** (`POST /api/product/create`) | `["CARD"]` for card/APM; `["CRYPTO"]` for on-chain QR. Wahid sends `paymentMethods: ["CARD"]` on payment create as a best-effort hint; product config is authoritative. |
 | Poll payment | `GET /api/payment/{id}` | paid status in `SUCCEEDED`/`SUCCESS`/… |
 | v3 checkout (beta) | `POST /v3/checkout/sessions` | `https://api.beta.suby.fi` (`SUBY_API_VERSION=v3`) |
 | Poll session | `GET /v3/checkout/sessions/{id}` | status `COMPLETED` |
