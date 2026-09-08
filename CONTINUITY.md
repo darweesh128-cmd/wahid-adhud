@@ -18,7 +18,7 @@
 | $1 membership | PR #24 (v2 default + successUrl fix) · #20 Suby MoR · #17 SEO · #15 v2 default · #7 $1 |
 | Brand voice | Interconnection / brotherhood / family mutual solidarity / **trust first** — **never** money-collection or scam framing |
 | Audience | **Global except Arabic countries** · English-first |
-| X posting | **@adudadid** — English-first routine enabled |
+| X posting | **@adudadid** — queue in `docs/PROMOTION.md` · share copy + hero updated to **$1 open account** |
 | TikTok | **TECH_BLOCK** — Access Denied (routine deleted) |
 | Reddit | Account creation attempt **in progress** |
 

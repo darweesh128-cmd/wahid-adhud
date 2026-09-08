@@ -201,12 +201,16 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
     <AppShell initial={pool}>
       <main className="relative mx-auto w-full max-w-5xl px-5 pb-28 pt-2 md:pb-16">
         <section className="stagger-in max-w-2xl">
-          <p className="text-xs font-medium text-accent">{t("storyKicker")}</p>
+          <p className="text-xs font-medium text-accent">
+            {t(membershipCheckoutV2 ? "storyKickerV2" : "storyKicker")}
+          </p>
           <h1 className="mt-4 text-3xl font-semibold tracking-tight text-fg sm:text-5xl">
             {t("storyH1a")}
             <span className="mt-2 block text-fg-muted">{t("storyH1b")}</span>
           </h1>
-          <p className="mt-6 max-w-xl text-base leading-relaxed text-fg sm:text-lg">{t("storyP1")}</p>
+          <p className="mt-6 max-w-xl text-base leading-relaxed text-fg sm:text-lg">
+            {t(membershipCheckoutV2 ? "storyP1V2" : "storyP1")}
+          </p>
           <dl className="mt-6 max-w-xl space-y-4 border-s-2 border-accent ps-4">
             <div>
               <dt className="text-sm font-medium tracking-wide text-accent">{t("storyEtymWord1")}</dt>
@@ -217,7 +221,9 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
               <dd className="mt-1 text-sm leading-relaxed text-fg-muted sm:text-base">{t("storyEtym2")}</dd>
             </div>
           </dl>
-          <p className="mt-6 max-w-xl text-sm leading-relaxed text-fg-muted sm:text-base">{t("storyP2")}</p>
+          <p className="mt-6 max-w-xl text-sm leading-relaxed text-fg-muted sm:text-base">
+            {t(membershipCheckoutV2 ? "storyP2V2" : "storyP2")}
+          </p>
           <div className="mt-8 flex flex-wrap gap-2">
             <Button size="lg" onClick={scrollToJoin}>
               {membershipCheckoutV2 ? t("createAccountCta") : t("joinCta")}
@@ -378,7 +384,7 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
             <ul className="space-y-3 text-sm text-fg-muted">
               <li className="flex gap-3">
                 <Fingerprint className="mt-0.5 size-4 shrink-0 text-accent" />
-                {t("point1")}
+                {t(membershipCheckoutV2 ? "point1V2" : "point1")}
               </li>
               <li className="flex gap-3">
                 <Shield className="mt-0.5 size-4 shrink-0 text-accent" />
@@ -449,7 +455,7 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
           <h2 className="text-sm font-medium">{t("howTitle")}</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             <Step n="01" title={t("step1t")}>
-              {t("step1")}
+              {t(membershipCheckoutV2 ? "step1V2" : "step1")}
             </Step>
             <Step n="02" title={t("step2t")}>
               {t("step2")}
@@ -479,7 +485,9 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
 
         <footer className="mt-14 border-t border-border pt-8 text-sm text-fg-muted">
           <p className="font-medium text-fg">{t("footerLead")}</p>
-          <p className="mt-2 max-w-2xl leading-relaxed">{t("footerBody")}</p>
+          <p className="mt-2 max-w-2xl leading-relaxed">
+            {t(membershipCheckoutV2 ? "footerBodyV2" : "footerBody")}
+          </p>
           <p className="mt-6 text-[11px] text-fg-subtle">
             {t("brand")} · {t("family")}
           </p>
