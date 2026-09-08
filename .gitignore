@@ -16,3 +16,7 @@ attachments
 AGENTS.md
 .project_id
 .node_modules.lock
+
+# Local ops reports may contain secrets — never commit
+SUBY_LOGIN_REPORT.md
+/tmp/suby-setup-report.json
