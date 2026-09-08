@@ -136,6 +136,19 @@ export async function loadMembershipPaymentById(paymentId: number): Promise<Paym
   return rows[0] ?? null;
 }
 
+export async function loadMembershipPaymentSessionById(
+  paymentId: number,
+): Promise<Pick<PaymentRow, "stripe_session_id" | "username" | "status" | "donation_id"> | null> {
+  const sql = await getSql();
+  const rows = await sql<Pick<PaymentRow, "stripe_session_id" | "username" | "status" | "donation_id">>`
+    select stripe_session_id, username, status, donation_id
+    from membership_payments
+    where id = ${paymentId}
+    limit 1
+  `;
+  return rows[0] ?? null;
+}
+
 export async function setMembershipPaymentSessionId(paymentId: number, sessionId: string): Promise<void> {
   const sql = await getSql();
   await sql`
