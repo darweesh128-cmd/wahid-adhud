@@ -1,7 +1,7 @@
 # Wahid · The Adhud — Continuity (Cursor-ready)
 
 **Purpose:** Resume from Cursor or Grok Bot anytime. **No secrets in this file.**  
-**Last updated:** 2026-09-09 (Asia/Riyadh) — @Adudadid live post C on X; Outlook session kept open  
+**Last updated:** 2026-09-09 (Asia/Riyadh) — @Adudadid reach loop: celebrity replies + site images; sessions kept  
 **Scope lock:** `darweesh128-cmd/wahid-adhud` only — do not touch other projects.
 
 ## Snapshot (NOW)
@@ -18,7 +18,7 @@
 | $1 membership | PR #24 (v2 default + successUrl fix) · #20 Suby MoR · #17 SEO · #15 v2 default · #7 $1 |
 | Brand voice | Interconnection / brotherhood / family mutual solidarity / **trust first** — **never** money-collection or scam framing |
 | Audience | **Global except Arabic countries** · English-first |
-| X posting | **@Adudadid LIVE** — Wed post C published `https://x.com/Adudadid/status/2097610630781906961` via Chrome session (Outlook tab kept open) |
+| X posting | **@Adudadid LIVE** — post C + 4 celebrity replies with site screenshots (Elon, MrBeast, NASA, CR7). Outlook tab kept open |
 | TikTok | **TECH_BLOCK** — Access Denied (routine deleted) |
 | Reddit | Account creation attempt **in progress** |
 

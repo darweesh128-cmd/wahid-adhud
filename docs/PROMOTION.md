@@ -77,11 +77,16 @@ Dry-run (no credentials needed): add `--dry-run`.
 
 ## Comments / replies
 
-1. `node scripts/x-publish.mjs mentions` — list unreplied mentions (needs API tokens **or** Grok Bot X connector for the read).
-2. Draft a short English solidarity reply (no USDT lead, no spam).
-3. `node scripts/x-publish.mjs reply --to TWEET_ID --text "..."` 
+Bank + voice: `scripts/x-replies.mjs` (mystery, takaful, quiet house). Attach `/workspace/.grok/x-cards/*.png` (live site shots).
 
-Do **not** auto-reply a generic CTA to every mention.
+1. Mentions: custom reply — not a generic CTA blast.
+2. Reach: recent famous-account originals only (no tragedy threads). Rotate R1–R8. One comment per target.
+
+### Live celebrity replies (2026-09-09)
+- @elonmusk → https://x.com/Adudadid/status/2097617374715207845
+- @MrBeast → https://x.com/Adudadid/status/2097618418518106121
+- @NASA → https://x.com/Adudadid/status/2097619363205423334
+- @Cristiano → https://x.com/Adudadid/status/2097620821673951587
 
 ---
 
@@ -96,6 +101,6 @@ Do **not** lead with crypto or USDT in X copy.
 
 | Channel | Status |
 |---------|--------|
-| X @adudadid | Publisher reactivated in repo — **live post blocked until X API user tokens + Hotmail unlock** |
+| X @Adudadid | **LIVE** Chrome session — post C + celebrity replies with site images |
 | TikTok | TECH_BLOCK |
 | Reddit | Account creation in progress |
