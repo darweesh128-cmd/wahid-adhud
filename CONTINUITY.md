@@ -1,7 +1,7 @@
 # Wahid · The Adhud — Continuity (Cursor-ready)
 
 **Purpose:** Resume from Cursor or Grok Bot anytime. **No secrets in this file.**  
-**Last updated:** 2026-09-07 (Asia/Riyadh) — production live  
+**Last updated:** 2026-09-09 (Asia/Riyadh) — X publisher reactivated in repo; live posts still blocked  
 **Scope lock:** `darweesh128-cmd/wahid-adhud` only — do not touch other projects.
 
 ## Snapshot (NOW)
@@ -18,7 +18,7 @@
 | $1 membership | PR #24 (v2 default + successUrl fix) · #20 Suby MoR · #17 SEO · #15 v2 default · #7 $1 |
 | Brand voice | Interconnection / brotherhood / family mutual solidarity / **trust first** — **never** money-collection or scam framing |
 | Audience | **Global except Arabic countries** · English-first |
-| X posting | **@adudadid** — English-first routine enabled |
+| X posting | **@adudadid** — publisher reactivated (`scripts/x-publish.mjs`) · **live blocked** (no X API user tokens in this environment) |
 | TikTok | **TECH_BLOCK** — Access Denied (routine deleted) |
 | Reddit | Account creation attempt **in progress** |
 
@@ -66,15 +66,17 @@
 ### Forbidden: **@Tarkou78** · **tarik_salihoglu@outlook.com** (Outlook)
 
 ### Open TECH_BLOCKs
-1. X @adudadid: Hotmail unlock in progress
+1. X @adudadid: Hotmail unlock in progress **and** no `X_API_*` / `X_ACCESS_TOKEN*` user-context secrets in Cloud Agent env — publisher code is live, posts/replies cannot hit the API yet
 2. TikTok: Access Denied (routine deleted)
 3. Reddit: account creation in progress
+4. Grok Bot official X connector is **read-only** (mentions/timeline). Write path is `scripts/x-publish.mjs` — see `docs/X_PUBLISHING.md`
 
 ## How to resume in Cursor
 1. Open `darweesh128-cmd/wahid-adhud` on `main`; read this file
 2. Verify www shows **Open account · $1** and checkout redirects to checkout.suby.fi
 3. @adudadid only — never @Tarkou78 or Outlook
 4. Secrets stay in Vercel vault — no keys in git/PRs/chat
+5. X write: `node scripts/x-publish.mjs status` then `post` / `reply` (see `docs/X_PUBLISHING.md`)
 
 ## Continuity rule
 Update on live URL changes, flag cutovers, or TECH_BLOCKs.

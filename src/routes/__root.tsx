@@ -23,6 +23,7 @@ export const Route = createRootRoute({
       { property: "og:description", content: APP_DESCRIPTION_EN },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@adudadid" },
       { name: "twitter:title", content: `${APP_NAME} · $1 mutual solidarity` },
       { name: "twitter:description", content: APP_DESCRIPTION_EN },
       { name: "keywords", content: "Wahid, Adhud, Open account, $1 membership, mutual solidarity, mutual aid, trust, ʿAḍud" },
