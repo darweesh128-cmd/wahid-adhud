@@ -97,6 +97,7 @@ const strings = {
     copyAddress: "انسخ العنوان",
     footerLead: "نحن العضد. كل دافعٍ عضيد.",
     footerBody: "لا دولة. لا بنك. لا حساب. تحويلات USDT نهائية. كل عطية عضد. كل مليون عون.",
+    footerSocial: "البيت على X وتيك توك — من يصل للموقع يصل للحساب.",
     toastJoined: "أنت عضيد. أرسل هذا لثلاثة.",
     toastMillion: "وصل المليون. العون بلغ عضيداً.",
     toastJoinFail: "تعذر الانضمام. حاول مرة أخرى.",
@@ -168,6 +169,8 @@ const strings = {
     copyInvite: "انسخ رسالة الدعوة",
     wa: "أرسل على واتساب",
     postX: "انشر على X",
+    followX: "X · @Adudadid",
+    followTikTok: "TikTok · @adud263",
     copyText: "انسخ النص",
     shareDevice: "شارك من هذا الجهاز",
     sent: "أُرسل.",
@@ -294,6 +297,7 @@ const strings = {
     copyAddress: "Copy address",
     footerLead: "We are the arm. Every payer is ʿAḍīd.",
     footerBody: "No state. No bank. No account. USDT transfers are final. Each gift is an arm. Each million is aid.",
+    footerSocial: "The house on X and TikTok — the site is the door to the accounts.",
     toastJoined: "You are ʿAḍīd. Send this to three people.",
     toastMillion: "The million landed. Aid reached an ʿAḍīd.",
     toastJoinFail: "Could not join. Try again.",
@@ -365,6 +369,8 @@ const strings = {
     copyInvite: "Copy invite message",
     wa: "Send on WhatsApp",
     postX: "Post on X",
+    followX: "X · @Adudadid",
+    followTikTok: "TikTok · @adud263",
     copyText: "Copy text",
     shareDevice: "Share from this device",
     sent: "Sent.",
@@ -471,10 +477,10 @@ export function useI18n() {
 }
 
 export const SHARE_COPY = {
-  ar: `قد تكون بخير اليوم.
+    ar: `قد تكون بخير اليوم.
 غيرك ليس كذلك.
 
-ادفع 5 USDT على TRC-20.
+افتح حسابك — عضوية دولار.
 تصبح عضيداً.
 
 لا تدخل لتأخذ.
@@ -484,7 +490,7 @@ export const SHARE_COPY = {
   en: `You may be fine today.
 Someone else is not.
 
-Pay 5 USDT on TRC-20.
+Open your account — $1 membership.
 Become ʿAḍīd.
 
 Do not join to take.

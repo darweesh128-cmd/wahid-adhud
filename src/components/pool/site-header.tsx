@@ -53,6 +53,14 @@ export function SiteHeader({
         >
           {t("networkNav")}
         </Link>
+        <a
+          href="https://x.com/Adudadid"
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex h-9 items-center rounded-md px-2 text-xs text-fg-muted hover:text-fg"
+        >
+          {t("followX")}
+        </a>
         {me ? (
           <Link
             to="/adhud/$wallet"

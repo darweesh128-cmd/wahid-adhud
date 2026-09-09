@@ -1,7 +1,7 @@
 # Wahid · The Adhud — Continuity (Cursor-ready)
 
 **Purpose:** Resume from Cursor or Grok Bot anytime. **No secrets in this file.**  
-**Last updated:** 2026-09-07 (Asia/Riyadh) — production live  
+**Last updated:** 2026-09-09 (Asia/Riyadh) — @Adudadid reach loop: celebrity replies + site images; sessions kept  
 **Scope lock:** `darweesh128-cmd/wahid-adhud` only — do not touch other projects.
 
 ## Snapshot (NOW)
@@ -18,8 +18,8 @@
 | $1 membership | PR #24 (v2 default + successUrl fix) · #20 Suby MoR · #17 SEO · #15 v2 default · #7 $1 |
 | Brand voice | Interconnection / brotherhood / family mutual solidarity / **trust first** — **never** money-collection or scam framing |
 | Audience | **Global except Arabic countries** · English-first |
-| X posting | **@adudadid** — English-first routine enabled |
-| TikTok | **TECH_BLOCK** — Access Denied (routine deleted) |
+| X posting | **@Adudadid LIVE** — post C + 4 celebrity replies with site screenshots (Elon, MrBeast, NASA, CR7). Outlook tab kept open |
+| TikTok | **@adud263 PUBLIC** — Chrome session live. Studio has 2 Everyone posts. Confirmed video: https://www.tiktok.com/@adud263/video/7683610223315012884 . Public grid can lag on a new account. Old @adud5959 retired. No password in this file |
 | Reddit | Account creation attempt **in progress** |
 
 ## Repo
@@ -66,15 +66,17 @@
 ### Forbidden: **@Tarkou78** · **tarik_salihoglu@outlook.com** (Outlook)
 
 ### Open TECH_BLOCKs
-1. X @adudadid: Hotmail unlock in progress
-2. TikTok: Access Denied (routine deleted)
+1. X @Adudadid: **session live in Cloud Agent Chrome** (Outlook + x.com). API user tokens still absent — browser path is the write layer until Runtime Secrets exist
+2. TikTok **@adud263** public + logged in — videoCount=2; first confirmed URL https://www.tiktok.com/@adud263/video/7683610223315012884 . Phone grid may need a pull-to-refresh. Web profile often hits slider captcha. Keep Chrome session. Upload MP4 only (rejects PNG)
 3. Reddit: account creation in progress
+4. Grok Bot official X connector is **read-only**. Browser + `scripts/x-publish.mjs` are the write path — see `docs/X_PUBLISHING.md`
 
 ## How to resume in Cursor
 1. Open `darweesh128-cmd/wahid-adhud` on `main`; read this file
 2. Verify www shows **Open account · $1** and checkout redirects to checkout.suby.fi
 3. @adudadid only — never @Tarkou78 or Outlook
 4. Secrets stay in Vercel vault — no keys in git/PRs/chat
+5. X write: `node scripts/x-publish.mjs status` then `post` / `reply` (see `docs/X_PUBLISHING.md`)
 
 ## Continuity rule
 Update on live URL changes, flag cutovers, or TECH_BLOCKs.
