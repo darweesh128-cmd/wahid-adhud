@@ -1,7 +1,7 @@
 import { Share2, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { inviteRef, nativeShare, pageUrl, shareMessage, whatsappHref, xHref } from "@/lib/share";
+import { inviteRef, nativeShare, pageUrl, shareMessage, TIKTOK_PROFILE_HREF, whatsappHref, X_PROFILE_HREF, xHref } from "@/lib/share";
 import { useI18n } from "@/lib/i18n";
 import { CopyButton } from "@/components/pool/copy-button";
 import { cn } from "@/lib/utils";
@@ -86,6 +86,18 @@ export function ShareOverlay({
               </a>
             </Button>
             <CopyButton value={message} size="default" label={t("copyText")} />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant="outline" asChild>
+              <a href={X_PROFILE_HREF} target="_blank" rel="noreferrer">
+                {t("followX")}
+              </a>
+            </Button>
+            <Button variant="outline" asChild>
+              <a href={TIKTOK_PROFILE_HREF} target="_blank" rel="noreferrer">
+                {t("followTikTok")}
+              </a>
+            </Button>
           </div>
           <Button variant="ghost" onClick={() => void onNative()}>
             {t("shareDevice")}

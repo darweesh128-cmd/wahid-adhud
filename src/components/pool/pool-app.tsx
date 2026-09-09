@@ -484,6 +484,15 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
         <footer className="mt-14 border-t border-border pt-8 text-sm text-fg-muted">
           <p className="font-medium text-fg">{t("footerLead")}</p>
           <p className="mt-2 max-w-2xl leading-relaxed">{t("footerBody")}</p>
+          <p className="mt-3 text-xs leading-relaxed">{t("footerSocial")}</p>
+          <p className="mt-3 flex flex-wrap gap-3 text-xs">
+            <a className="text-accent hover:underline" href="https://x.com/Adudadid" target="_blank" rel="noreferrer">
+              {t("followX")}
+            </a>
+            <a className="text-accent hover:underline" href="https://www.tiktok.com/@adud5959" target="_blank" rel="noreferrer">
+              {t("followTikTok")}
+            </a>
+          </p>
           <p className="mt-6 text-[11px] text-fg-subtle">
             {t("brand")} · {t("family")}
           </p>

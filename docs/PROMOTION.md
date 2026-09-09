@@ -102,5 +102,5 @@ Do **not** lead with crypto or USDT in X copy.
 | Channel | Status |
 |---------|--------|
 | X @Adudadid | **LIVE** Chrome session — post C + celebrity replies with site images |
-| TikTok | TECH_BLOCK |
+| TikTok @adud5959 | Account exists, **private** — set Public in the TikTok phone app |
 | Reddit | Account creation in progress |
