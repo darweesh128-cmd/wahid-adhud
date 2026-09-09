@@ -489,7 +489,7 @@ export function PoolApp({ initial, network: initialNetwork }: { initial: PoolSna
             <a className="text-accent hover:underline" href="https://x.com/Adudadid" target="_blank" rel="noreferrer">
               {t("followX")}
             </a>
-            <a className="text-accent hover:underline" href="https://www.tiktok.com/@adud5959" target="_blank" rel="noreferrer">
+            <a className="text-accent hover:underline" href="https://www.tiktok.com/@adud263" target="_blank" rel="noreferrer">
               {t("followTikTok")}
             </a>
           </p>

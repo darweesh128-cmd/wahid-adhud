@@ -19,7 +19,7 @@
 | Brand voice | Interconnection / brotherhood / family mutual solidarity / **trust first** — **never** money-collection or scam framing |
 | Audience | **Global except Arabic countries** · English-first |
 | X posting | **@Adudadid LIVE** — post C + 4 celebrity replies with site screenshots (Elon, MrBeast, NASA, CR7). Outlook tab kept open |
-| TikTok | **@adud5959 exists, PRIVATE** — web cannot flip public; needs phone app once |
+| TikTok | **@adud263 PUBLIC** — Chrome session live. First video posted (site open / $1). Old @adud5959 retired. No password in this file |
 | Reddit | Account creation attempt **in progress** |
 
 ## Repo
@@ -67,7 +67,7 @@
 
 ### Open TECH_BLOCKs
 1. X @Adudadid: **session live in Cloud Agent Chrome** (Outlook + x.com). API user tokens still absent — browser path is the write layer until Runtime Secrets exist
-2. TikTok @adud5959: account exists, still **private** — public toggle is mobile-only
+2. TikTok **@adud263** public + logged in — first video live on the profile. Keep the Chrome session. Web upload needs MP4 (rejects PNG)
 3. Reddit: account creation in progress
 4. Grok Bot official X connector is **read-only**. Browser + `scripts/x-publish.mjs` are the write path — see `docs/X_PUBLISHING.md`
 

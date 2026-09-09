@@ -33,7 +33,7 @@ export function whatsappHref(lang: Lang = "en", ref?: string | null): string {
 }
 
 export const X_PROFILE_HREF = "https://x.com/Adudadid";
-export const TIKTOK_PROFILE_HREF = "https://www.tiktok.com/@adud5959";
+export const TIKTOK_PROFILE_HREF = "https://www.tiktok.com/@adud263";
 
 export function xHref(lang: Lang = "en", ref?: string | null): string {
   return `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage(lang, ref))}`;
