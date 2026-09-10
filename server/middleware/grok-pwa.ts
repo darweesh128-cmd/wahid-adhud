@@ -36,6 +36,11 @@ function requestHost(event: GrokPwaEvent): string {
   );
 }
 
+function isPublicHidden(): boolean {
+  const v = String(process.env.PUBLIC_HIDDEN || process.env.VITE_PUBLIC_HIDDEN || "").trim().toLowerCase();
+  return v === "true" || v === "1" || v === "yes";
+}
+
 function injectHeadStreaming(response: Response, host: string): Response {
   const injector = createHeadInjector({
     host,
@@ -70,6 +75,10 @@ export default async function grokPwaMiddleware(
   const path = event.url.pathname;
   const urlWithQuery = path + event.url.search;
 
+  if (isPublicHidden()) {
+    return next();
+  }
+
   if (path === "/__grok/manifest.webmanifest" || path === "/__grok/manifest.json") {
     return new Response(renderWebManifest(requestHost(event)), {
       headers: {
@@ -94,6 +103,10 @@ export default async function grokPwaMiddleware(
         "cache-control": "no-cache",
       },
     });
+  }
+
+  if (isPublicHidden()) {
+    return next();
   }
 
   if (!isDocumentPath(path)) return next();
