@@ -1,10 +1,10 @@
 # Wahid · The Adhud
 
-Wallet-level mutual aid. No account. No KYC. Five USDT on TRC-20.
+**Public product is offline.** The live site and social posts are hidden while the message is rewritten. Code remains in this repo.
 
-You may be fine today. Someone else is not.
+**Cursor / Cloud Agent:** See [CONTINUITY.md](./CONTINUITY.md) (no secrets).
 
-**Cursor / Cloud Agent:** See [CONTINUITY.md](./CONTINUITY.md) for session resume context (no secrets).
+To restore public pages, set `PUBLIC_HIDDEN` and `VITE_PUBLIC_HIDDEN` to `false` in `vercel.json` and redeploy.
 
 ## The example
 

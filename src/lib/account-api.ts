@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { createServerFn } from "@tanstack/react-start";
 import { getSql } from "@/lib/db";
 import { isMembershipCheckoutV2Enabled } from "@/lib/membership";
+import { isPublicHidden } from "@/lib/public-hidden";
 import { isCountry } from "@/lib/pool";
 import { checkoutAvailable, completeMockCheckout, createMembershipCheckoutForAccount } from "@/lib/stripe-checkout";
 import { normalizeUsername, suggestUsername, usernameHint, accountDeskWallet } from "@/lib/username";
@@ -30,6 +31,7 @@ async function isUsernameAvailable(username: string): Promise<boolean> {
 }
 
 export const suggestAdhudUsername = createServerFn({ method: "GET" }).handler(async (): Promise<{ username: string }> => {
+  if (isPublicHidden()) return { username: "" };
   let candidate = suggestUsername();
   for (let i = 0; i < 8; i += 1) {
     if (await isUsernameAvailable(candidate)) break;
@@ -51,6 +53,7 @@ export const checkAdhudUsername = createServerFn({ method: "GET" })
     return { username: username.trim().slice(0, 32) };
   })
   .handler(async ({ data }): Promise<UsernameCheckResult> => {
+    if (isPublicHidden()) return { ok: false, error: "Unavailable." };
     const hint = usernameHint(data.username);
     if (hint) return { ok: false, error: hint };
     const username = normalizeUsername(data.username);
@@ -81,6 +84,9 @@ export const createAdhudAccount = createServerFn({ method: "POST" })
     };
   })
   .handler(async ({ data }): Promise<CreateAccountResult> => {
+    if (isPublicHidden()) {
+      return { ok: false, error: "Unavailable." };
+    }
     if (!isMembershipCheckoutV2Enabled()) {
       return { ok: false, error: "Account checkout is not enabled." };
     }
@@ -142,6 +148,7 @@ export const getAdhudAccount = createServerFn({ method: "GET" })
     return { username: normalizeUsername(username) };
   })
   .handler(async ({ data }): Promise<AccountProfile | null> => {
+    if (isPublicHidden()) return null;
     const sql = await getSql();
     const rows = await sql<{ id: number; username: string; country: string; status: string; payout_wallet: string | null }>`
       select id, username, country, status, payout_wallet
@@ -172,6 +179,7 @@ export const payMockCheckout = createServerFn({ method: "POST" })
     return { paymentId: id, token: token.trim() };
   })
   .handler(async ({ data }) => {
+    if (isPublicHidden()) return { ok: false as const, error: "Unavailable." };
     const stamp = await clientStamp();
     return completeMockCheckout(data.paymentId, data.token, stamp);
   });

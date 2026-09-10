@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { isPublicHidden } from "@/lib/public-hidden";
 
 const STATIC_PATHS = ["/", "/network"] as const;
 
@@ -23,6 +24,17 @@ export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: ({ request }) => {
+        if (isPublicHidden()) {
+          const body = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+</urlset>`;
+          return new Response(body, {
+            headers: {
+              "Content-Type": "application/xml; charset=utf-8",
+              "X-Robots-Tag": "noindex, nofollow, noarchive",
+            },
+          });
+        }
         const origin = siteOrigin(request);
         const today = new Date().toISOString().slice(0, 10);
         const urls = STATIC_PATHS.map(

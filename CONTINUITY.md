@@ -1,26 +1,21 @@
 # Wahid · The Adhud — Continuity (Cursor-ready)
 
 **Purpose:** Resume from Cursor or Grok Bot anytime. **No secrets in this file.**  
-**Last updated:** 2026-09-07 (Asia/Riyadh) — production live  
+**Last updated:** 2026-09-10 (UTC) — **PUBLIC HIDDEN** while the message is rewritten  
 **Scope lock:** `darweesh128-cmd/wahid-adhud` only — do not touch other projects.
 
 ## Snapshot (NOW)
 
 | Area | State |
 |------|--------|
-| Live site | **https://www.adhud.xyz** HTTP 200 · Domains **Valid** on Vercel project `temporary-prompt-savanna-pzvu0qr` |
+| Live site | **HIDDEN** — `PUBLIC_HIDDEN=true` / `VITE_PUBLIC_HIDDEN=true`. www must serve a blank noindex page (no Adhud copy, no join). Merge this to `main` to take production down |
 | Apex | https://adhud.xyz → 308 → www |
-| Production join | **LIVE** — **Open account · $1** on www (HTTP 200) |
-| Checkout smoke | **Verified** — create account → redirect to **checkout.suby.fi** (stopped before card) |
-| SEO | Title/meta/og say **Open account · $1** (no 5 USDT lead) |
-| Checkout mode | **Suby v2 live** — `MEMBERSHIP_PROVIDER=suby`, `SUBY_API_VERSION=v2`, `SUBY_PRODUCT_ID=pro_j2b6qq84weq359rt3of1fl4p` (v3 beta rejects live vault key) |
-| Legacy USDT | **5 USDT TRC-20** collapsible **Or join with USDT** (House `TVmEo3Mn6dJfAWgk8KUF7rEvcdbdegmDER`) |
-| $1 membership | PR #24 (v2 default + successUrl fix) · #20 Suby MoR · #17 SEO · #15 v2 default · #7 $1 |
-| Brand voice | Interconnection / brotherhood / family mutual solidarity / **trust first** — **never** money-collection or scam framing |
-| Audience | **Global except Arabic countries** · English-first |
-| X posting | **@adudadid** — English-first routine enabled |
-| TikTok | **TECH_BLOCK** — Access Denied (routine deleted) |
-| Reddit | Account creation attempt **in progress** |
+| Production join | **OFF** — create-account / checkout return Unavailable |
+| SEO | `X-Robots-Tag: noindex, nofollow, noarchive` · robots Disallow: / |
+| Checkout mode | Suby keys remain in vault but public join is blocked |
+| X posting | **STOP** — hide/protect @Adudadid until the new message |
+| TikTok | **STOP** — set @adud263 Private until the new message |
+| Reddit | Do not publish |
 
 ## Repo
 
@@ -43,6 +38,7 @@
 - `DATABASE_URL` — secrets only; Neon `wahid-adhud` / `little-field-83907551`; migrations through 0009
 
 ## Vercel production env (baked in `vercel.json` — no secrets)
+- `PUBLIC_HIDDEN=true` · `VITE_PUBLIC_HIDDEN=true` — **public product offline**
 - `MEMBERSHIP_CHECKOUT_V2=true` · `VITE_MEMBERSHIP_CHECKOUT_V2=true`
 - `MEMBERSHIP_PROVIDER=suby`
 - `SUBY_PRODUCT_ID=pro_j2b6qq84weq359rt3of1fl4p`
@@ -52,9 +48,9 @@
 **Vault only (names):** `SUBY_API_KEY`, `SUBY_WEBHOOK_SECRET`, optional `DATABASE_URL`
 
 ## Live / deploy
-- **https://www.adhud.xyz** · Vercel project `temporary-prompt-savanna-pzvu0qr` · Domains Valid
-- Deploy: git push `main` → Vercel production; `vercel.json` must stay valid JSON (no `$comment`)
-- English-only via PR #6
+- **https://www.adhud.xyz** is **hidden** once this flag is on `main`
+- To restore later: set `PUBLIC_HIDDEN` / `VITE_PUBLIC_HIDDEN` to `false` and redeploy
+- `vercel.json` must stay valid JSON (no `$comment`)
 
 ## Join
 - Primary: **$1** Open account + username → **checkout.suby.fi** (Suby v2 live)
@@ -71,10 +67,11 @@
 3. Reddit: account creation in progress
 
 ## How to resume in Cursor
-1. Open `darweesh128-cmd/wahid-adhud` on `main`; read this file
-2. Verify www shows **Open account · $1** and checkout redirects to checkout.suby.fi
+1. Open `darweesh128-cmd/wahid-adhud`; public product is **HIDDEN** until the new message
+2. Do not post on X or TikTok as Adhud until the owner unhides
 3. @adudadid only — never @Tarkou78 or Outlook
 4. Secrets stay in Vercel vault — no keys in git/PRs/chat
+5. Restore: `PUBLIC_HIDDEN=false` + `VITE_PUBLIC_HIDDEN=false` then redeploy
 
 ## Continuity rule
 Update on live URL changes, flag cutovers, or TECH_BLOCKs.
