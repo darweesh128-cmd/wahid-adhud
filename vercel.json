@@ -8,8 +8,8 @@
       "SUBY_PAYMENT_METHODS": "CARD",
       "SUBY_API_VERSION": "v2",
       "SUBY_PRICE_CENTS": "100",
-      "PUBLIC_HIDDEN": "true",
-      "VITE_PUBLIC_HIDDEN": "true"
+      "PUBLIC_HIDDEN": "false",
+      "VITE_PUBLIC_HIDDEN": "false"
     }
   },
   "env": {
@@ -19,13 +19,8 @@
     "SUBY_PRODUCT_ID": "pro_j2b6qq84weq359rt3of1fl4p",
     "SUBY_API_VERSION": "v2",
     "SUBY_PRICE_CENTS": "100",
-    "PUBLIC_HIDDEN": "true",
-    "VITE_PUBLIC_HIDDEN": "true"
+    "PUBLIC_HIDDEN": "false",
+    "VITE_PUBLIC_HIDDEN": "false"
   },
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" }]
-    }
-  ]
+  "headers": []
 }

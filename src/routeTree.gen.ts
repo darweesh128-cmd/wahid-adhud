@@ -10,7 +10,13 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ConstitutionRouteImport } from './routes/constitution'
+import { Route as CraftsmanRouteImport } from './routes/craftsman'
+import { Route as GovernanceRouteImport } from './routes/governance'
+import { Route as HowRouteImport } from './routes/how'
+import { Route as JoinRouteImport } from './routes/join'
 import { Route as NetworkRouteImport } from './routes/network'
+import { Route as ParticipantRouteImport } from './routes/participant'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AdhudWalletRouteImport } from './routes/adhud.$wallet'
@@ -24,9 +30,39 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConstitutionRoute = ConstitutionRouteImport.update({
+  id: '/constitution',
+  path: '/constitution',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CraftsmanRoute = CraftsmanRouteImport.update({
+  id: '/craftsman',
+  path: '/craftsman',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GovernanceRoute = GovernanceRouteImport.update({
+  id: '/governance',
+  path: '/governance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowRoute = HowRouteImport.update({
+  id: '/how',
+  path: '/how',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JoinRoute = JoinRouteImport.update({
+  id: '/join',
+  path: '/join',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NetworkRoute = NetworkRouteImport.update({
   id: '/network',
   path: '/network',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParticipantRoute = ParticipantRouteImport.update({
+  id: '/participant',
+  path: '/participant',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
@@ -67,7 +103,13 @@ const ApiSubyWebhookRoute = ApiSubyWebhookRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/constitution': typeof ConstitutionRoute
+  '/craftsman': typeof CraftsmanRoute
+  '/governance': typeof GovernanceRoute
+  '/how': typeof HowRoute
+  '/join': typeof JoinRoute
   '/network': typeof NetworkRoute
+  '/participant': typeof ParticipantRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/adhud/$wallet': typeof AdhudWalletRoute
@@ -78,7 +120,13 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/constitution': typeof ConstitutionRoute
+  '/craftsman': typeof CraftsmanRoute
+  '/governance': typeof GovernanceRoute
+  '/how': typeof HowRoute
+  '/join': typeof JoinRoute
   '/network': typeof NetworkRoute
+  '/participant': typeof ParticipantRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/adhud/$wallet': typeof AdhudWalletRoute
@@ -90,7 +138,13 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/constitution': typeof ConstitutionRoute
+  '/craftsman': typeof CraftsmanRoute
+  '/governance': typeof GovernanceRoute
+  '/how': typeof HowRoute
+  '/join': typeof JoinRoute
   '/network': typeof NetworkRoute
+  '/participant': typeof ParticipantRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/adhud/$wallet': typeof AdhudWalletRoute
@@ -103,7 +157,13 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/constitution'
+    | '/craftsman'
+    | '/governance'
+    | '/how'
+    | '/join'
     | '/network'
+    | '/participant'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/adhud/$wallet'
@@ -114,7 +174,13 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/constitution'
+    | '/craftsman'
+    | '/governance'
+    | '/how'
+    | '/join'
     | '/network'
+    | '/participant'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/adhud/$wallet'
@@ -125,7 +191,13 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/constitution'
+    | '/craftsman'
+    | '/governance'
+    | '/how'
+    | '/join'
     | '/network'
+    | '/participant'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/adhud/$wallet'
@@ -137,7 +209,13 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ConstitutionRoute: typeof ConstitutionRoute
+  CraftsmanRoute: typeof CraftsmanRoute
+  GovernanceRoute: typeof GovernanceRoute
+  HowRoute: typeof HowRoute
+  JoinRoute: typeof JoinRoute
   NetworkRoute: typeof NetworkRoute
+  ParticipantRoute: typeof ParticipantRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AdhudWalletRoute: typeof AdhudWalletRoute
@@ -156,11 +234,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/constitution': {
+      id: '/constitution'
+      path: '/constitution'
+      fullPath: '/constitution'
+      preLoaderRoute: typeof ConstitutionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/craftsman': {
+      id: '/craftsman'
+      path: '/craftsman'
+      fullPath: '/craftsman'
+      preLoaderRoute: typeof CraftsmanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/governance': {
+      id: '/governance'
+      path: '/governance'
+      fullPath: '/governance'
+      preLoaderRoute: typeof GovernanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how': {
+      id: '/how'
+      path: '/how'
+      fullPath: '/how'
+      preLoaderRoute: typeof HowRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/join': {
+      id: '/join'
+      path: '/join'
+      fullPath: '/join'
+      preLoaderRoute: typeof JoinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/network': {
       id: '/network'
       path: '/network'
       fullPath: '/network'
       preLoaderRoute: typeof NetworkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/participant': {
+      id: '/participant'
+      path: '/participant'
+      fullPath: '/participant'
+      preLoaderRoute: typeof ParticipantRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/robots.txt': {
@@ -217,7 +337,13 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ConstitutionRoute: ConstitutionRoute,
+  CraftsmanRoute: CraftsmanRoute,
+  GovernanceRoute: GovernanceRoute,
+  HowRoute: HowRoute,
+  JoinRoute: JoinRoute,
   NetworkRoute: NetworkRoute,
+  ParticipantRoute: ParticipantRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   AdhudWalletRoute: AdhudWalletRoute,
