@@ -2,11 +2,11 @@ import { createContext, useContext, useEffect, useMemo, type ReactNode } from "r
 
 export type Lang = "ar" | "en";
 
-/** Product locale — English-only for now; Arabic strings kept for later. */
-export const DEFAULT_LANG: Lang = "en";
+/** Product locale — Arabic-first for عَضُد constitution site. */
+export const DEFAULT_LANG: Lang = "ar";
 const LANG_STORAGE_KEYS = ["waahid-lang", "waahid-lang-v2"] as const;
 
-/** Remove saved locale prefs so stale `ar` cannot flip the UI after deploy. */
+/** Align document direction with the active product locale. */
 export function clearAllLangPrefs(): void {
   if (typeof window !== "undefined") {
     for (const key of LANG_STORAGE_KEYS) {
@@ -26,12 +26,12 @@ export function clearAllLangPrefs(): void {
       }
     }
     document.documentElement.lang = DEFAULT_LANG;
-    document.documentElement.dir = "ltr";
+    document.documentElement.dir = DEFAULT_LANG === "ar" ? "rtl" : "ltr";
   }
 }
 
-/** Runs in <head> before paint: purge legacy prefs and lock document to English. */
-export const LANG_BOOTSTRAP_SCRIPT = `(function(){var keys=${JSON.stringify([...LANG_STORAGE_KEYS])};try{for(var i=0;i<keys.length;i++){localStorage.removeItem(keys[i]);document.cookie=keys[i]+"=;path=/;max-age=0;samesite=lax";}}catch(e){}document.documentElement.lang="en";document.documentElement.dir="ltr";})();`;
+/** Runs in <head> before paint: purge legacy prefs and lock document to Arabic RTL. */
+export const LANG_BOOTSTRAP_SCRIPT = `(function(){var keys=${JSON.stringify([...LANG_STORAGE_KEYS])};try{for(var i=0;i<keys.length;i++){localStorage.removeItem(keys[i]);document.cookie=keys[i]+"=;path=/;max-age=0;samesite=lax";}}catch(e){}document.documentElement.lang="ar";document.documentElement.dir="rtl";})();`;
 
 const strings = {
   ar: {
@@ -441,7 +441,7 @@ export const HINT_KEYS = {
 
 type I18nValue = {
   lang: Lang;
-  dir: "ltr";
+  dir: "rtl" | "ltr";
   t: (key: CopyKey) => string;
 };
 
@@ -455,8 +455,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const value = useMemo<I18nValue>(
     () => ({
       lang: DEFAULT_LANG,
-      dir: "ltr",
-      t: (key) => strings.en[key],
+      dir: DEFAULT_LANG === "ar" ? "rtl" : "ltr",
+      t: (key) => strings.ar[key] ?? strings.en[key],
     }),
     [],
   );

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { isPublicHidden } from "@/lib/public-hidden";
 
-const STATIC_PATHS = ["/", "/network"] as const;
+const STATIC_PATHS = ["/", "/craftsman", "/participant", "/how", "/governance", "/constitution", "/join"] as const;
 
 function siteOrigin(request: Request): string {
   try {

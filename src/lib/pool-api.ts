@@ -273,6 +273,7 @@ export const getMembershipCheckoutStatus = createServerFn({ method: "GET" })
       if (!sessionId) return { ok: true, status: "pending" };
     }
     const stamp = await clientStamp();
+    if (!sessionId) return { ok: true, status: "pending" };
     const result = await completeCheckoutSession(sessionId, stamp);
     if (result.status === "completed" && result.username) {
       const sql = await getSql();

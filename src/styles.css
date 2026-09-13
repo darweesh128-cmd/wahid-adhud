@@ -1,34 +1,25 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #090b0a;
-  --color-surface: #121614;
-  --color-surface-2: #181d1b;
-  --color-surface-3: #1f2623;
-  --color-fg: #e8eee9;
-  --color-fg-muted: #8b938c;
-  --color-fg-subtle: #6a726c;
-  --color-accent: #7ddbb2;
-  --color-accent-hover: #93e4c0;
-  --color-accent-fg: #07110c;
-  --color-accent-soft: color-mix(in oklab, var(--color-accent) 16%, transparent);
-  --color-border: color-mix(in oklab, var(--color-fg) 12%, transparent);
-  --color-border-strong: color-mix(in oklab, var(--color-fg) 22%, transparent);
-  --color-ring: #7ddbb2;
-  --color-paper: #f4f7f4;
-  --color-danger: #e07a6a;
+  /* ورشة إنتاجية — حجر زيتوني بارد، حبر غابوي، نحاس خفيف (ليست كريمة/تيراكوتا ولا بنفسجي) */
+  --color-bg: #e4ebe6;
+  --color-surface: #f3f6f2;
+  --color-fg: #12201a;
+  --color-fg-muted: #4a5c52;
+  --color-ink: #0e1a16;
+  --color-paper: #f7faf7;
+  --color-accent: #2f6b4f;
+  --color-accent-soft: color-mix(in oklab, var(--color-accent) 14%, transparent);
+  --color-brass: #9a7b3c;
+  --color-border: color-mix(in oklab, var(--color-fg) 14%, transparent);
+  --color-ring: #2f6b4f;
 
-  --font-sans: "IBM Plex Sans", "IBM Plex Sans Arabic", "Segoe UI", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-sans: "IBM Plex Sans Arabic", "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Amiri", "IBM Plex Sans Arabic", serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
-  --radius-xs: 4px;
-  --radius-sm: 8px;
   --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --radius-2xl: 32px;
-
-  --shadow-soft: 0 18px 40px -28px rgb(0 0 0 / 0.7);
+  --radius-xl: 20px;
 }
 
 @layer base {
@@ -44,35 +35,28 @@
     color: var(--color-fg);
   }
 
-  html[lang="ar"] {
-    --font-sans: "IBM Plex Sans Arabic", "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
-  }
-
   body {
     min-height: 100dvh;
     background: var(--color-bg);
     color: var(--color-fg);
     font-family: var(--font-sans);
-    line-height: 1.55;
+    line-height: 1.65;
   }
 
   h1,
   h2,
   h3 {
     text-wrap: balance;
-    line-height: 1.15;
-    letter-spacing: -0.03em;
-  }
-
-  html[lang="ar"] h1,
-  html[lang="ar"] h2,
-  html[lang="ar"] h3 {
-    letter-spacing: 0;
+    line-height: 1.2;
   }
 
   p {
     text-wrap: pretty;
   }
+}
+
+@utility font-display {
+  font-family: var(--font-display);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -85,20 +69,68 @@
   }
 }
 
-.stagger-in > * {
-  animation: rise 400ms cubic-bezier(0.22, 1, 0.36, 1) both;
+/* جو الورشة — طبقات ضوء وظل خشبي/زيتوني */
+.workshop-atmosphere,
+.workshop-atmosphere {
+  background:
+    radial-gradient(1200px 600px at 85% -10%, color-mix(in oklab, var(--color-brass) 18%, transparent), transparent 60%),
+    radial-gradient(900px 500px at -10% 20%, color-mix(in oklab, var(--color-accent) 16%, transparent), transparent 55%),
+    linear-gradient(165deg, #d7e2da 0%, #e4ebe6 42%, #dde6e0 100%);
 }
-.stagger-in > *:nth-child(1) { animation-delay: 0ms; }
-.stagger-in > *:nth-child(2) { animation-delay: 40ms; }
-.stagger-in > *:nth-child(3) { animation-delay: 80ms; }
-.stagger-in > *:nth-child(4) { animation-delay: 120ms; }
-.stagger-in > *:nth-child(5) { animation-delay: 160ms; }
+
+.hero-plane,
+.hero-plane {
+  background:
+    linear-gradient(180deg, transparent 40%, var(--color-bg) 100%),
+    radial-gradient(ellipse 80% 60% at 70% 30%, color-mix(in oklab, var(--color-accent) 22%, transparent), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 15% 70%, color-mix(in oklab, var(--color-brass) 14%, transparent), transparent 65%),
+    repeating-linear-gradient(
+      -12deg,
+      transparent,
+      transparent 18px,
+      color-mix(in oklab, var(--color-fg) 2.5%, transparent) 18px,
+      color-mix(in oklab, var(--color-fg) 2.5%, transparent) 19px
+    );
+  animation: hero-drift 18s ease-in-out infinite alternate;
+}
+
+@keyframes hero-drift {
+  from {
+    transform: scale(1) translate3d(0, 0, 0);
+    filter: saturate(1);
+  }
+  to {
+    transform: scale(1.04) translate3d(-1.5%, 1%, 0);
+    filter: saturate(1.08);
+  }
+}
+
+.stagger-in > *,
+.stagger-in > * {
+  animation: rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.stagger-in > *:nth-child(1),
+.stagger-in > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.stagger-in > *:nth-child(2),
+.stagger-in > *:nth-child(2) {
+  animation-delay: 70ms;
+}
+.stagger-in > *:nth-child(3),
+.stagger-in > *:nth-child(3) {
+  animation-delay: 140ms;
+}
+.stagger-in > *:nth-child(4),
+.stagger-in > *:nth-child(4) {
+  animation-delay: 210ms;
+}
 
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(8px);
-    filter: blur(2px);
+    transform: translateY(14px);
+    filter: blur(3px);
   }
   to {
     opacity: 1;
@@ -107,34 +139,15 @@
   }
 }
 
-.share-pulse {
-  animation: share-pulse 2s ease-in-out infinite;
+.reveal-card {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: color-mix(in oklab, var(--color-surface) 88%, transparent);
+  padding: 1.25rem;
+  transition: transform 280ms ease, border-color 280ms ease, background 280ms ease;
 }
-
-@keyframes share-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-accent) 35%, transparent);
-  }
-  50% {
-    box-shadow: 0 0 0 6px color-mix(in oklab, var(--color-accent) 0%, transparent);
-  }
-}
-
-.live-dot {
-  animation: pulse-live 1.6s ease-in-out infinite;
-}
-
-@keyframes pulse-live {
-
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
-}
-
-.hero-wash {
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, var(--color-accent) 7%, transparent),
-    transparent
-  );
+.reveal-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in oklab, var(--color-accent) 35%, var(--color-border));
+  background: var(--color-surface);
 }
